@@ -12,6 +12,7 @@ const DRV = ['    [DRV]'];
 
 const ITEMS = [DRV, DISPLAY, COMPUTE]; // 가벼운 순으로 정렬
 let stepCount = 0;
+let snapShot = [];
 
 // 각 책상을 number을 key값으로, value를 배열로 저장
 const tables = {
@@ -21,10 +22,20 @@ const tables = {
 };
 
 // 출력 함수
-function printWithFormat(n, start, to) {
+function printWithFormat(step) {
+  //step에 맞는 table 찾기
+  const targetTable = snapShot[step - 1];
+
   console.log(`Turn ${stepCount}`);
-  formatTable(tables); // 3x9 그리드
+  console.log(formatTable(targetTable)); // 3x9 그리드
   console.log('1======== 2======== 3========');
+}
+
+//Tabels 상태를 저장해두는 함수
+function pushToSnapshotArray(tables) {
+  // const snap = { ...tables };
+  const snap = JSON.parse(JSON.stringify(tables));
+  snapShot.push(snap);
 }
 
 // 아이템 이동 함수
@@ -33,8 +44,9 @@ function move(n, start, to) {
   tables[to].push(item);
   //step 상승
   stepCount++;
-  //출력
-  printWithFormat(n, start, to);
+  //snap shot 저장
+  pushToSnapshotArray(tables);
+  // printWithFormat(n, start, to);
 }
 
 // 하노이 재귀 함수
@@ -68,8 +80,14 @@ function formatTable(tables) {
   }
 
   // 📌 최종 출력
-  console.log(grid.map((row) => row.join(' ')).join('\n'));
+  return grid.map((row) => row.join(' ')).join('\n');
 }
 
-// 하노이 실행
-hanoi(2, 'table1', 'table3', 'table2');
+function main(step) {
+  //하노이 실행
+  hanoi(2, 'table1', 'table3', 'table2');
+  //step에 맞는 출력
+  printWithFormat(step);
+}
+
+main(7);
