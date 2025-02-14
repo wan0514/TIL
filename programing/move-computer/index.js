@@ -1,17 +1,14 @@
-const COMPUTE = {
-  name: 'computer',
-  shape: ['+-------+', '|COMPUTE|', '+-------+'],
-};
+const COMPUTE = ['+-------+', '|COMPUTE|', '+-------+'];
 
-const DISPLAY = {
-  name: 'display',
-  shape: ['+-------+', '|       |', '|DISPLAY|', '|       |', '+-------+'],
-};
+const DISPLAY = [
+  '+-------+',
+  '|       |',
+  '|DISPLAY|',
+  '|       |',
+  '+-------+',
+];
 
-const DRV = {
-  name: 'drv',
-  shape: ['    [DRV]'],
-};
+const DRV = ['    [DRV]'];
 
 const ITEMS = [DRV, DISPLAY, COMPUTE]; // 가벼운 순으로 정렬
 let stepCount = 0;
@@ -26,16 +23,17 @@ const tables = {
 // 출력 함수
 function printWithFormat(n, start, to) {
   console.log(`Turn ${stepCount}`);
-  formatTable(3, 9, tables); // 3x9 그리드
+  formatTable(tables); // 3x9 그리드
   console.log('1======== 2======== 3========');
-  console.log(`${ITEMS[n].name}이 ${start}에서 ${to}로 이동`);
 }
 
 // 아이템 이동 함수
 function move(n, start, to) {
   const item = tables[start].pop();
   tables[to].push(item);
+  //step 상승
   stepCount++;
+  //출력
   printWithFormat(n, start, to);
 }
 
@@ -48,7 +46,9 @@ function hanoi(n, start, to, via) {
 }
 
 // 테이블 포맷팅 함수 (3열, 9행 그리드)
-function formatTable(cols, rows, tables) {
+function formatTable(tables) {
+  const cols = 3;
+  const rows = 9;
   const whitespace = '         '; // 7칸 공백
   const grid = Array.from({ length: rows }, () => Array(cols).fill(whitespace));
 
@@ -58,12 +58,12 @@ function formatTable(cols, rows, tables) {
 
     let row = rows - 1; // 아래에서 위로 채움
     for (let item of table) {
-      for (let i = 0; i < item.shape.length; i++) {
+      for (let i = 0; i < item.length; i++) {
         if (row - i >= 0) {
-          grid[row - i][col] = item.shape[i]; // shape의 각 줄을 해당 row에 배치
+          grid[row - i][col] = item[i]; // shape의 각 줄을 해당 row에 배치
         }
       }
-      row -= item.shape.length; // shape 크기만큼 위로 이동
+      row -= item.length; // shape 크기만큼 위로 이동
     }
   }
 
