@@ -11,7 +11,6 @@ const DISPLAY = [
 const DRV = ['    [DRV]'];
 
 const ITEMS = [DRV, DISPLAY, COMPUTE]; // 가벼운 순으로 정렬
-let stepCount = 0;
 let snapShot = [];
 
 // 각 책상을 number을 key값으로, value를 배열로 저장
@@ -26,34 +25,30 @@ function printWithFormat(step) {
   //step에 맞는 table 찾기
   const targetTable = snapShot[step - 1];
 
-  console.log(`Turn ${stepCount}`);
+  console.log(`Step ${step}`);
   console.log(formatTable(targetTable)); // 3x9 그리드
   console.log('1======== 2======== 3========');
 }
 
 //Tabels 상태를 저장해두는 함수
 function pushToSnapshotArray(tables) {
-  // const snap = { ...tables };
   const snap = JSON.parse(JSON.stringify(tables));
   snapShot.push(snap);
 }
 
 // 아이템 이동 함수
-function move(n, start, to) {
+function move(start, to) {
   const item = tables[start].pop();
   tables[to].push(item);
-  //step 상승
-  stepCount++;
   //snap shot 저장
   pushToSnapshotArray(tables);
-  // printWithFormat(n, start, to);
 }
 
 // 하노이 재귀 함수
 function hanoi(n, start, to, via) {
-  if (n === 0) return move(n, start, to);
+  if (n === 0) return move(start, to);
   hanoi(n - 1, start, via, to);
-  move(n, start, to);
+  move(start, to);
   hanoi(n - 1, via, to, start);
 }
 
@@ -62,6 +57,8 @@ function formatTable(tables) {
   const cols = 3;
   const rows = 9;
   const whitespace = '         '; // 7칸 공백
+
+  // 3x9 그리드 생성 : 기본값은 whitespace
   const grid = Array.from({ length: rows }, () => Array(cols).fill(whitespace));
 
   // 테이블 데이터를 grid에 배치
@@ -90,4 +87,4 @@ function main(step) {
   printWithFormat(step);
 }
 
-main(7);
+main(3);
