@@ -51,3 +51,28 @@ fs.unlink(filePath, (err) => {
 
   console.log('File has been deleted!');
 });
+
+//하지만 위의 경우는 비동기 코드이므로 순차적인 진행이 보장되지 않는다.
+// 동기적으로 생성,읽기,삭제를 하고 싶다면 Sync 매서드를 사용!
+
+const data2 = [
+  ['이름', '나이', '직업'],
+  ['김동기', '10', '디자이너'],
+];
+
+const filePath2 = path.join(currentDir, 'output2.csv');
+
+const csvString2 = data2.map((row) => row.join(',')).join('\n');
+
+// 파일 작성 (동기)
+fs.writeFileSync(filePath2, csvString2, 'utf8');
+console.log('File has been saved!');
+
+// 파일 읽기 (동기)
+const dataWithSync = fs.readFileSync(filePath2, 'utf8');
+const parsedData = dataWithSync.split('\n').map((item) => item.split(','));
+console.log(parsedData);
+
+// 파일 삭제 (동기)
+fs.unlinkSync(filePath2);
+console.log('File has been deleted!');
