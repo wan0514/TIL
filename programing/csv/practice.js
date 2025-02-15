@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 // csv 파일 생성 및 읽기 연습
 
 // 파일 읽기 (쉼표와 개행으로 이루어진 csv파일을 배열 데이터로 읽기)
@@ -22,3 +24,14 @@ const data = [
 const csvString = data.map((row) => row.join(',')).join('\n');
 
 console.log(csvString);
+
+// 현재 파일의 URL을 가져와서 경로로 변환
+const currentDir = new URL('.', import.meta.url).pathname;
+
+// 같은 디렉토리 내에 'output.csv' 파일 경로 생성
+const filePath = path.join(currentDir, 'output.csv');
+
+fs.writeFile(filePath, csvString, 'utf8', (err) => {
+  if (err) throw err;
+  console.log('File has been saved!');
+});

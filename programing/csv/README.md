@@ -99,3 +99,101 @@ Node.js가 제공하는 API로, 파일 시스템을 제어하는 모듈.
 - 간단한 CSV 파일 처리는 `fs.readFile() + split()`을 사용.
 - JSON 형태로 변환하려면 `csv-parser`를 사용하는 것이 가장 편리함.
 - 파일 삭제는 `fs.unlink()`를 사용하며, 최신 방식으로 `fs.rm()`을 사용할 수도 있음.
+
+---
+
+# 실수와 에러 경험
+
+아래는 실패했던 코드와 그에 대한 설명을 합친 내용입니다:
+
+---
+
+### 1. **실패했던 코드 1: `__dirname` 사용 (ES 모듈에서는 사용 불가)**
+
+```javascript
+import fs from 'fs';
+import path from 'path';
+
+// __dirname을 사용하려 했으나 ES 모듈에서는 지원되지 않음
+const currentDir = __dirname; // 오류 발생: ES 모듈에서 __dirname 사용 불가
+
+const filePath = path.join(currentDir, 'output.csv');
+
+fs.writeFile(filePath, 'Name, Age\nJohn, 30', 'utf8', (err) => {
+  if (err) throw err;
+  console.log('File has been saved!');
+});
+```
+
+- **문제**: `__dirname`은 CommonJS 모듈에서 사용 가능하지만, **ES 모듈**에서는 지원되지 않아서 해당 코드에서 오류가 발생했습니다.
+
+---
+
+### 2. **실패했던 코드 2: `EISDIR` 오류가 발생한 코드**
+
+```javascript
+import fs from 'fs';
+import path from 'path';
+
+// 경로가 디렉토리인 상태에서 파일을 생성하려 했음
+const currentDir = new URL('.', import.meta.url).pathname;
+
+// 현재 디렉토리로 지정한 경로가 디렉토리여서 파일을 생성할 수 없었음
+const filePath = path.join(currentDir, 'output.csv'); // 여기도 제대로 된 파일 경로로 지정되지 않음
+
+fs.writeFile(filePath, 'Name, Age\nJohn, 30', 'utf8', (err) => {
+  if (err) throw err;
+  console.log('File has been saved!');
+});
+```
+
+- **문제**: `new URL('.', import.meta.url).pathname`을 사용하여 현재 파일 경로를 얻으려고 했으나, **디렉토리 경로**가 반환되었습니다. 이 상태에서 파일을 생성하려 하자 `EISDIR` 오류가 발생했습니다. 이는 지정한 경로가 디렉토리여서 파일을 생성할 수 없다는 의미입니다.
+
+---
+
+### **해결 방법:**
+
+1. **`__dirname` 대체**: ES 모듈에서는 `__dirname`을 사용할 수 없기 때문에 `import.meta.url`을 사용하여 파일 경로를 얻고 이를 활용해야 합니다.
+2. **경로 확인**: 경로가 **디렉토리**가 아닌 **파일 경로**로 제대로 설정되어야 합니다. 디렉토리가 존재하는지 확인하고, 파일 경로로 처리해야 합니다.
+
+### **최종 해결된 코드 예시**:
+
+```javascript
+import fs from 'fs';
+import path from 'path';
+
+// 현재 파일의 URL을 가져와서 경로로 변환
+const currentDir = new URL('.', import.meta.url).pathname;
+
+// 같은 디렉토리 내에 'output.csv' 파일 경로 생성
+const filePath = path.join(currentDir, 'output.csv');
+
+// 파일 생성
+fs.writeFile(filePath, 'Name, Age\nJohn, 30', 'utf8', (err) => {
+  if (err) throw err;
+  console.log('File has been saved at the same directory as the script!');
+});
+```
+
+- **해결된 부분**: `currentDir`을 `new URL('.', import.meta.url).pathname`으로 수정하여, 정확한 파일 경로를 얻었고, 이를 `path.join()`으로 파일 경로와 파일명을 결합하여 최종적으로 파일을 생성할 수 있었습니다.
+
+---
+
+이처럼, **ES 모듈 환경에서는 `__dirname`을 사용할 수 없고**, 현재 파일의 경로를 구하려면 `import.meta.url`을 활용해야 하며, **경로가 디렉토리가 아닌 파일 경로로 지정되어야** 오류 없이 파일을 생성할 수 있습니다.
+
+### 관련된 공식 문서:
+
+- [MDN Web Docs - URL](https://developer.mozilla.org/en-US/docs/Web/API/URL)  
+  `URL` 객체에 대한 공식 문서입니다. 여기서 `new URL()` 생성자와 `.pathname` 속성에 대한 자세한 설명을 확인할 수 있습니다.
+
+- [MDN Web Docs - import.meta](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import.meta)  
+  `import.meta`에 대한 공식 문서로, ES 모듈에서 `import.meta.url`을 사용할 때의 용법을 다룹니다.
+
+- [MDN Web Docs - EISDIR 오류](https://nodejs.org/api/errors.html#errors_common_system_errors)  
+  `EISDIR` 오류는 "Is a directory"라는 의미로, 디렉토리에서 파일을 열려고 시도할 때 발생합니다. 이 오류와 관련된 공식 Node.js 문서에서 시스템 오류 코드들을 확인할 수 있습니다.
+
+- [Node.js 공식 문서 - fs 모듈](https://nodejs.org/api/fs.html)  
+  `fs` 모듈에 대한 공식 문서입니다. 파일 시스템과 관련된 다양한 작업(파일 읽기, 쓰기, 삭제 등)을 수행하는 방법을 다룹니다.
+
+- [Node.js 공식 문서 - \_\_dirname](https://nodejs.org/api/modules.html#modules_dirname)  
+  `__dirname`에 대한 공식 문서입니다. Node.js에서 현재 모듈의 **디렉토리 이름**을 반환하는 특수 변수에 대해 설명합니다. ES 모듈에서는 `__dirname`을 사용할 수 없고, 대체 방법으로 `import.meta.url`을 사용해야 합니다.
