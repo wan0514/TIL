@@ -102,98 +102,91 @@ Node.js가 제공하는 API로, 파일 시스템을 제어하는 모듈.
 
 ---
 
-# 실수와 에러 경험
+# 구현
 
-아래는 실패했던 코드와 그에 대한 설명을 합친 내용입니다:
+## 객체와 모듈의 차이는 무엇인가?
+
+SQL 형식의 문장을 반복해서 처리하면서, 데이터를 CSV 파일로 저장하고, 데이터 형식을 따로 관리해야 한다면, **객체와 모듈을 나누는 기준**을 잘 정해야 유지보수하기 좋은 구조를 만들 수 있다.
+
+### **💡 객체 vs. 모듈을 나누는 기준**
+
+| 구분            | 객체 (Object)                                          | 모듈 (Module)                                |
+| --------------- | ------------------------------------------------------ | -------------------------------------------- |
+| **역할**        | 특정 데이터를 관리하거나 조작                          | 여러 기능을 묶어서 독립적인 코드 단위로 제공 |
+| **상태(State)** | 상태를 가지며, 그 상태를 기반으로 동작                 | 보통 상태 없이 함수(유틸리티)를 제공         |
+| **재사용성**    | 같은 데이터를 다루는 여러 개의 인스턴스를 만들 수 있음 | 여러 파일에서 import하여 사용                |
 
 ---
 
-### 1. **실패했던 코드 1: `__dirname` 사용 (ES 모듈에서는 사용 불가)**
+## **🔍 1. 데이터 관리와 CSV 파일 저장을 어떻게 나눌 것인가?**
 
-```javascript
-import fs from 'fs';
-import path from 'path';
+- **CSV 파일을 생성하고 저장하는 기능은 모듈로 만들 것인가?**  
+  → CSV 파일을 저장하는 기능은 상태를 가질 필요 없이 단순한 함수로 만들 수 있어.  
+  → `csvHandler.js` 같은 모듈을 만들어서 `export function saveToCSV()` 같은 방식으로 관리하면 좋음.
 
-// __dirname을 사용하려 했으나 ES 모듈에서는 지원되지 않음
-const currentDir = __dirname; // 오류 발생: ES 모듈에서 __dirname 사용 불가
+- **데이터 자체를 객체로 만들어야 하는가?**  
+  → 데이터에는 여러 개의 테이블이 있을 것이고, 각 테이블은 컬럼(데이터 형식)을 관리해야 함.  
+  → 이걸 **객체로 만들어서 인스턴스를 관리하는 게 좋음.**  
+  → 예를 들어, `Table` 클래스를 만들어서 테이블마다 컬럼과 데이터를 관리하게 할 수 있음.
 
-const filePath = path.join(currentDir, 'output.csv');
+---
 
-fs.writeFile(filePath, 'Name, Age\nJohn, 30', 'utf8', (err) => {
-  if (err) throw err;
-  console.log('File has been saved!');
-});
+# 기능 구현
+
+## 어떻게 입력값을 분석해서 각각의 기능을 실행할 것인가?
+
+정규식 표현을 이용하여 입력값을 분석하는 함수를 만든다.
+분석한 값을 객체로 반환한다. 객체는 명령어마다 구조가 다르다.
+
+```
+{ command: 'CREATE', tableName, columns, dataTypes };
+{ command: 'INSERT', tableName, columns, values };
+{ command: 'DELETE', tableName, condition };
 ```
 
-- **문제**: `__dirname`은 CommonJS 모듈에서 사용 가능하지만, **ES 모듈**에서는 지원되지 않아서 해당 코드에서 오류가 발생했습니다.
+해당 객체의 공통 키는 command이며, 이를 통해 어떤 명령인지 switch 문으로
+각각의 기능 함수를 실행시킨다.
 
----
-
-### 2. **실패했던 코드 2: `EISDIR` 오류가 발생한 코드**
-
-```javascript
-import fs from 'fs';
-import path from 'path';
-
-// 경로가 디렉토리인 상태에서 파일을 생성하려 했음
-const currentDir = new URL('.', import.meta.url).pathname;
-
-// 현재 디렉토리로 지정한 경로가 디렉토리여서 파일을 생성할 수 없었음
-const filePath = path.join(currentDir, 'output.csv'); // 여기도 제대로 된 파일 경로로 지정되지 않음
-
-fs.writeFile(filePath, 'Name, Age\nJohn, 30', 'utf8', (err) => {
-  if (err) throw err;
-  console.log('File has been saved!');
-});
+```
+  switch (parsedInput.command) {
+    case 'CREATE':
+      createFile(parsedInput);
+      break;
+    case 'INSERT':
+      insertToFile(parsedInput);
+      break;
+    case 'DELETE':
+      deleteFrom(parsedInput);
+      break;
+    default:
+      console.log('Unknown command');
+  }
 ```
 
-- **문제**: `new URL('.', import.meta.url).pathname`을 사용하여 현재 파일 경로를 얻으려고 했으나, **디렉토리 경로**가 반환되었습니다. 이 상태에서 파일을 생성하려 하자 `EISDIR` 오류가 발생했습니다. 이는 지정한 경로가 디렉토리여서 파일을 생성할 수 없다는 의미입니다.
+## 어떻게 칼럼의 dataType과 id값을 저장하고 조회할 것인가?
 
----
+csv파일을 다루는 모듈과 칼럼 정보를 관리하는 스키마매니저 객채를 따로 구현한다.
+추가,삭제 등이 이루어지면 동기화를 시킨다.
 
-### **해결 방법:**
+1. CsvHanlder.js (CSV 파일을 다루는 모듈)
 
-1. **`__dirname` 대체**: ES 모듈에서는 `__dirname`을 사용할 수 없기 때문에 `import.meta.url`을 사용하여 파일 경로를 얻고 이를 활용해야 합니다.
-2. **경로 확인**: 경로가 **디렉토리**가 아닌 **파일 경로**로 제대로 설정되어야 합니다. 디렉토리가 존재하는지 확인하고, 파일 경로로 처리해야 합니다.
+- CSV 파일 생성
+- 데이터 읽기/쓰기
+- 칼럼 추가/삭제
 
-### **최종 해결된 코드 예시**:
+2. class Table , Database (테이블 데이터 관리 객체)
 
-```javascript
-import fs from 'fs';
-import path from 'path';
+- 테이블 생성(Table객체를 만든 후 이를 기반으로 csv파일 생성)
+- 칼럼 ID 관리
+- 데이터 타입 관리
+- 칼럼 추가/삭제
 
-// 현재 파일의 URL을 가져와서 경로로 변환
-const currentDir = new URL('.', import.meta.url).pathname;
+## 실수
 
-// 같은 디렉토리 내에 'output.csv' 파일 경로 생성
-const filePath = path.join(currentDir, 'output.csv');
+### 1. 잘못 파싱된 입력값
 
-// 파일 생성
-fs.writeFile(filePath, 'Name, Age\nJohn, 30', 'utf8', (err) => {
-  if (err) throw err;
-  console.log('File has been saved at the same directory as the script!');
-});
-```
+원인 : 정규식표현의 캡처 구문을 제대로 작성하지 않아 match[index]로 접근했을 때 다른 값이 들어갔었습니다.
 
-- **해결된 부분**: `currentDir`을 `new URL('.', import.meta.url).pathname`으로 수정하여, 정확한 파일 경로를 얻었고, 이를 `path.join()`으로 파일 경로와 파일명을 결합하여 최종적으로 파일을 생성할 수 있었습니다.
+### 2. 테이블이 존재함에도 존재하지 않는 테이블 에러가 발생
 
----
-
-이처럼, **ES 모듈 환경에서는 `__dirname`을 사용할 수 없고**, 현재 파일의 경로를 구하려면 `import.meta.url`을 활용해야 하며, **경로가 디렉토리가 아닌 파일 경로로 지정되어야** 오류 없이 파일을 생성할 수 있습니다.
-
-### 관련된 공식 문서:
-
-- [MDN Web Docs - URL](https://developer.mozilla.org/en-US/docs/Web/API/URL)  
-  `URL` 객체에 대한 공식 문서입니다. 여기서 `new URL()` 생성자와 `.pathname` 속성에 대한 자세한 설명을 확인할 수 있습니다.
-
-- [MDN Web Docs - import.meta](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import.meta)  
-  `import.meta`에 대한 공식 문서로, ES 모듈에서 `import.meta.url`을 사용할 때의 용법을 다룹니다.
-
-- [MDN Web Docs - EISDIR 오류](https://nodejs.org/api/errors.html#errors_common_system_errors)  
-  `EISDIR` 오류는 "Is a directory"라는 의미로, 디렉토리에서 파일을 열려고 시도할 때 발생합니다. 이 오류와 관련된 공식 Node.js 문서에서 시스템 오류 코드들을 확인할 수 있습니다.
-
-- [Node.js 공식 문서 - fs 모듈](https://nodejs.org/api/fs.html)  
-  `fs` 모듈에 대한 공식 문서입니다. 파일 시스템과 관련된 다양한 작업(파일 읽기, 쓰기, 삭제 등)을 수행하는 방법을 다룹니다.
-
-- [Node.js 공식 문서 - \_\_dirname](https://nodejs.org/api/modules.html#modules_dirname)  
-  `__dirname`에 대한 공식 문서입니다. Node.js에서 현재 모듈의 **디렉토리 이름**을 반환하는 특수 변수에 대해 설명합니다. ES 모듈에서는 `__dirname`을 사용할 수 없고, 대체 방법으로 `import.meta.url`을 사용해야 합니다.
+원인 : 테이블 존재 여부 함수를 조건문에 넣었으나 !(not 연산자)를 사용하여 함수 반환값이 반대가 되어서, 존재함에도 에러가 발생했었습니다.
