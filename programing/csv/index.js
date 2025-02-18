@@ -1,4 +1,7 @@
 import { createFile, insertToFile, deleteFrom } from './csvHandler.js';
+import readline from 'node:readline';
+
+// 메인 로직 : 입력값을 받고 파싱 -> 로직 수행
 
 // 정규식 상수화
 const CREATE_TABLE_REGEX =
@@ -92,14 +95,26 @@ function parseCommand(input) {
   return null;
 }
 
-main('CREATE TABLE billboard (singer string, year Numeric, song String)');
+// readline 프롬포트
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
-main(
-  'INSERT INTO billboard (singer, year, song) VALUES ("BTS", 2020, "Dynamite")'
-);
+const prompt = () => {
+  rl.question('> ', (input) => {
+    if (input === 'end') {
+      rl.close();
+    } else {
+      main(input);
+      prompt(); // 다시 프롬프트 실행
+    }
+  });
+};
 
-main(
-  'INSERT INTO billboard (singer, year, song) VALUES ("WOWO", 2011, "sososos")'
-);
+rl.on('close', () => {
+  console.log('프로그램 종료');
+});
 
-main('DELETE FROM billboard WHERE id = 1');
+// 프로그램 실행
+prompt();
