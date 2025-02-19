@@ -1,0 +1,5 @@
+//문제: https://www.hackerrank.com/challenges/a-very-big-sum/problem
+
+function aVeryBigSum(ar) {
+  return ar.reduce((acc, cur) => (acc += cur), 0);
+}
