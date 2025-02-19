@@ -42,14 +42,14 @@ class Triangle extends Geometry {
 
 class Polygon extends Geometry {
   constructor(points) {
-    if (points.length <= 4) {
+    if (points.length < 5) {
       throw new Error('다각형은 최소 5개의 점이 필요합니다.');
     }
     super(points);
   }
 
   calculate() {
-    const sortedByCounterClockWise = sortPointsCounterClockwise(this.points); //반시계 방향으로 정렬
+    const sortedByCounterClockWise = this.getSortPointsCounterClockwise(); //반시계 방향으로 정렬
     const basePoint = sortedByCounterClockWise[0]; // 기준점 (첫 번째 점)
     let totalArea = 0;
 
@@ -63,6 +63,22 @@ class Polygon extends Geometry {
     }
 
     return totalArea;
+  }
+
+  getSortPointsCounterClockwise() {
+    // 1. 중심점(무게중심) 구하기
+    const centerX =
+      this.points.reduce((sum, p) => sum + p.x, 0) / this.points.length;
+    const centerY =
+      this.points.reduce((sum, p) => sum + p.y, 0) / this.points.length;
+    const center = { x: centerX, y: centerY };
+
+    // 2. 각 점의 극각(atan2)을 구하고 정렬
+    return this.points.slice().sort((a, b) => {
+      const angleA = Math.atan2(a.y - center.y, a.x - center.x);
+      const angleB = Math.atan2(b.y - center.y, b.x - center.x);
+      return angleA - angleB; // 작은 각도부터 큰 각도 순으로 정렬 (반시계 방향)
+    });
   }
 }
 
