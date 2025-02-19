@@ -49,15 +49,15 @@ class Polygon extends Shape {
   }
 
   getArea() {
-    const sortedByClockWise = sortPointsCounterClockwise(this.points); //반시계 방향으로 정렬
-    const basePoint = sortedByClockWise[0]; // 기준점 (첫 번째 점)
+    const sortedByCounterClockWise = sortPointsCounterClockwise(this.points); //반시계 방향으로 정렬
+    const basePoint = sortedByCounterClockWise[0]; // 기준점 (첫 번째 점)
     let totalArea = 0;
 
-    for (let i = 1; i < sortedByClockWise.length - 1; i++) {
+    for (let i = 1; i < sortedByCounterClockWise.length - 1; i++) {
       const triangle = new Triangle(
         basePoint,
-        sortedByClockWise[i],
-        sortedByClockWise[i + 1]
+        sortedByCounterClockWise[i],
+        sortedByCounterClockWise[i + 1]
       );
       totalArea += triangle.getArea();
     }
