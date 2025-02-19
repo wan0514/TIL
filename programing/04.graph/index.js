@@ -1,5 +1,5 @@
 import readline from 'node:readline';
-import { Point, Line, Triangle, ShapeFactory } from './cordinateHandler.js';
+import { Point, ShapeFactory } from './cordinateHandler.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
