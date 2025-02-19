@@ -8,20 +8,40 @@ const rl = readline.createInterface({
 
 //입력 모듈
 const prompt = () => {
-  rl.question('두 개의 좌표값을 (x,y)-(x,y) 형태로 입력하세요> ', (input) => {
-    if (input === 'end') {
-      rl.close();
-    } else {
-      const result = validateAndParseCoordinates(input);
-      if (result) {
-        const myHandler = new CoordinateHandler(result);
-        const distance = myHandler.getDistance(result[0], result[1]);
-        console.log(`두 점 사이의 거리는: ${distance}`);
-      }
+  rl.question(
+    '두 개 이상의 좌표값을 (x,y)-(x,y) 형태로 입력하세요> ',
+    (input) => {
+      if (input === 'end') {
+        rl.close();
+      } else {
+        const result = validateAndParseCoordinates(input);
+        if (result) {
+          const myHandler = new CoordinateHandler(result);
 
-      prompt(); // 다시 입력 받기
+          if (myHandler.array.length === 2) {
+            //직선을 구하기
+            const distance = myHandler.getDistance(result[0], result[1]);
+            console.log(`두 점 사이의 거리는: ${distance}`);
+          } else if (myHandler.array.length === 3) {
+            //삼각형 넓이 구하기
+            const a = myHandler.getDistance(result[0], result[1]);
+            const b = myHandler.getDistance(result[1], result[2]);
+            const c = myHandler.getDistance(result[2], result[0]);
+
+            const area = myHandler.calculateTriangleArea(a, b, c);
+            console.log(`삼각형 넓이는: ${area}`);
+            //넓이를 구하기
+          } else if (myHandler.array.length > 3) {
+            // 다각형
+          } else {
+            return;
+          }
+        }
+
+        prompt(); // 다시 입력 받기
+      }
     }
-  });
+  );
 };
 
 rl.on('close', () => {
