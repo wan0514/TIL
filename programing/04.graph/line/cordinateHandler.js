@@ -10,10 +10,8 @@ class Shape {
     this.points = points;
   }
 
-  calculateArea() {
-    throw new Error(
-      'calculateArea()는 반드시 하위 클래스에서 구현해야 합니다.'
-    );
+  getArea() {
+    throw new Error('getArea()는 반드시 하위 클래스에서 구현해야 합니다.');
   }
 }
 
@@ -34,7 +32,7 @@ class Triangle extends Shape {
     this.lines = [new Line(p1, p2), new Line(p2, p3), new Line(p3, p1)];
   }
 
-  calculateArea() {
+  getArea() {
     const [a, b, c] = this.lines.map((line) => line.getDistance());
     const s = (a + b + c) / 2;
     const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
@@ -50,7 +48,7 @@ class Polygon extends Shape {
     super(points);
   }
 
-  calculateArea() {}
+  getArea() {}
 }
 
 //팩토리 객체
@@ -61,8 +59,6 @@ class ShapeFactory {
         return new Line(points[0], points[1]);
       case 3:
         return new Triangle(points[0], points[1], points[2]);
-      case 4:
-        return new Rectangle(points[0], points[1], points[2], points[3]);
       default:
         return new Polygon(points);
     }

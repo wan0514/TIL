@@ -1,5 +1,5 @@
 import readline from 'node:readline';
-import { Point, Line, Triangle } from './cordinateHandler.js';
+import { Point, Line, Triangle, ShapeFactory } from './cordinateHandler.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -17,22 +17,14 @@ const prompt = () => {
         const result = validateAndParseCoordinates(input);
         if (result) {
           const points = result.map(({ x, y }) => new Point(x, y));
+          const shape = ShapeFactory.createShape(points);
 
-          if (points.length === 2) {
-            //직선을 구하기
-            const line = new Line(points[0], points[1]);
-            const distance = line.getDistance();
-            console.log(`두 점 사이의 거리는: ${distance}`);
-          } else if (points.length === 3) {
-            //삼각형 넓이 구하기
-            const triangle = new Triangle(...points);
-            const area = triangle.calculateArea();
-            console.log(`삼각형 넓이는: ${area}`);
-            //넓이를 구하기
-          } else if (points.length > 3) {
-            // 다각형
-          } else {
-            return;
+          if (shape.points.length === 2) {
+            console.log(shape.getDistance());
+          }
+
+          if (shape.points.length > 2) {
+            console.log(shape.getArea());
           }
         }
 
