@@ -12,7 +12,10 @@ const prompt = () => {
       rl.close();
     } else {
       const result = validateAndParseCoordinates(input);
-      if (result) console.log(result);
+      if (result) {
+        const distance = calculateDistance(result);
+        console.log(`두 점 사이의 거리는: ${distance}`);
+      }
 
       prompt(); // 다시 입력 받기
     }
@@ -80,4 +83,10 @@ function validateAndProcess(input) {
   }
 
   return { valid: true, count, coordinates };
+}
+
+function calculateDistance(array) {
+  return Math.sqrt(
+    (array[0].x - array[1].x) ** 2 + (array[0].y - array[1].y) ** 2
+  );
 }
