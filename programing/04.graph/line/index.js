@@ -1,4 +1,5 @@
 import readline from 'node:readline';
+import { CoordinateHandler } from './cordinateHandler.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -13,7 +14,8 @@ const prompt = () => {
     } else {
       const result = validateAndParseCoordinates(input);
       if (result) {
-        const distance = calculateDistance(result);
+        const myHandler = new CoordinateHandler(result);
+        const distance = myHandler.getDistance(result[0], result[1]);
         console.log(`두 점 사이의 거리는: ${distance}`);
       }
 
@@ -83,10 +85,4 @@ function validateAndProcess(input) {
   }
 
   return { valid: true, count, coordinates };
-}
-
-function calculateDistance(array) {
-  return Math.sqrt(
-    (array[0].x - array[1].x) ** 2 + (array[0].y - array[1].y) ** 2
-  );
 }
