@@ -5,50 +5,50 @@ class Point {
   }
 }
 
-class Shape {
+class Geometry {
   constructor(points) {
     this.points = points;
   }
 
-  getArea() {
-    throw new Error('getArea()는 반드시 하위 클래스에서 구현해야 합니다.');
+  calculate() {
+    throw new Error('calculate()는 반드시 하위 클래스에서 구현해야 합니다.');
   }
 }
 
-class Line extends Shape {
+class Line extends Geometry {
   constructor(p1, p2) {
     super([p1, p2]);
   }
 
-  getDistance() {
+  calculate() {
     const [p1, p2] = this.points;
     return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
   }
 }
 
-class Triangle extends Shape {
+class Triangle extends Geometry {
   constructor(p1, p2, p3) {
     super([p1, p2, p3]);
     this.lines = [new Line(p1, p2), new Line(p2, p3), new Line(p3, p1)];
   }
 
-  getArea() {
-    const [a, b, c] = this.lines.map((line) => line.getDistance());
+  calculate() {
+    const [a, b, c] = this.lines.map((line) => line.calculate());
     const s = (a + b + c) / 2;
     const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
     return Number(area.toFixed(2));
   }
 }
 
-class Polygon extends Shape {
+class Polygon extends Geometry {
   constructor(points) {
-    if (points.length < 4) {
-      throw new Error('다각형은 최소 4개의 점이 필요합니다.');
+    if (points.length <= 4) {
+      throw new Error('다각형은 최소 5개의 점이 필요합니다.');
     }
     super(points);
   }
 
-  getArea() {
+  calculate() {
     const sortedByCounterClockWise = sortPointsCounterClockwise(this.points); //반시계 방향으로 정렬
     const basePoint = sortedByCounterClockWise[0]; // 기준점 (첫 번째 점)
     let totalArea = 0;
@@ -59,7 +59,7 @@ class Polygon extends Shape {
         sortedByCounterClockWise[i],
         sortedByCounterClockWise[i + 1]
       );
-      totalArea += triangle.getArea();
+      totalArea += triangle.calculate();
     }
 
     return totalArea;
@@ -67,8 +67,8 @@ class Polygon extends Shape {
 }
 
 //팩토리 객체
-class ShapeFactory {
-  static createShape(points) {
+class GeometryFactory {
+  static createGeometry(points) {
     switch (points.length) {
       case 2:
         return new Line(points[0], points[1]);
@@ -80,7 +80,7 @@ class ShapeFactory {
   }
 }
 
-export { Point, Shape, Line, Triangle, Polygon, ShapeFactory };
+export { Point, Geometry, Line, Triangle, Polygon, GeometryFactory };
 
 function sortPointsCounterClockwise(points) {
   // 1. 중심점(무게중심) 구하기

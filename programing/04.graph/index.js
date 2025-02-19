@@ -1,5 +1,5 @@
 import readline from 'node:readline';
-import { Point, ShapeFactory } from './cordinateHandler.js';
+import { Point, GeometryFactory } from './cordinateHandler.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -17,15 +17,9 @@ const prompt = () => {
         const result = validateAndParseCoordinates(input);
         if (result) {
           const points = result.map(({ x, y }) => new Point(x, y));
-          const shape = ShapeFactory.createShape(points);
+          const geometry = GeometryFactory.createGeometry(points);
 
-          if (shape.points.length === 2) {
-            console.log(shape.getDistance());
-          }
-
-          if (shape.points.length > 2) {
-            console.log(shape.getArea());
-          }
+          console.log(geometry.calculate());
         }
 
         prompt(); // 다시 입력 받기
