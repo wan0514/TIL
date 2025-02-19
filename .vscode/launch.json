@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/programing/04.graph/line/index.js",
+      "program": "${workspaceFolder}/programing/04.graph/index.js",
       "console": "integratedTerminal" // 터미널에서 실행을 표시
     }
   ]
