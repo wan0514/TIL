@@ -1,5 +1,5 @@
 import readline from 'node:readline';
-import { CoordinateHandler } from './cordinateHandler.js';
+import { Point, Line, Triangle } from './cordinateHandler.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -16,18 +16,20 @@ const prompt = () => {
       } else {
         const result = validateAndParseCoordinates(input);
         if (result) {
-          const myHandler = new CoordinateHandler(result);
+          const points = result.map(({ x, y }) => new Point(x, y));
 
-          if (myHandler.array.length === 2) {
+          if (points.length === 2) {
             //직선을 구하기
-            const distance = myHandler.getDistance(0, 1);
+            const line = new Line(points[0], points[1]);
+            const distance = line.getDistance();
             console.log(`두 점 사이의 거리는: ${distance}`);
-          } else if (myHandler.array.length === 3) {
+          } else if (points.length === 3) {
             //삼각형 넓이 구하기
-            const area = myHandler.calculateTriangleArea();
+            const triangle = new Triangle(...points);
+            const area = triangle.calculateArea();
             console.log(`삼각형 넓이는: ${area}`);
             //넓이를 구하기
-          } else if (myHandler.array.length > 3) {
+          } else if (points.length > 3) {
             // 다각형
           } else {
             return;
