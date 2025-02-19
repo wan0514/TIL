@@ -36,7 +36,7 @@ class Triangle extends Shape {
     const [a, b, c] = this.lines.map((line) => line.getDistance());
     const s = (a + b + c) / 2;
     const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
-    return Math.trunc(Number(area.toFixed(2)));
+    return Number(area.toFixed(2));
   }
 }
 
@@ -48,7 +48,22 @@ class Polygon extends Shape {
     super(points);
   }
 
-  getArea() {}
+  getArea() {
+    const sortedByClockWise = sortPointsCounterClockwise(this.points); //반시계 방향으로 정렬
+    const basePoint = sortedByClockWise[0]; // 기준점 (첫 번째 점)
+    let totalArea = 0;
+
+    for (let i = 1; i < sortedByClockWise.length - 1; i++) {
+      const triangle = new Triangle(
+        basePoint,
+        sortedByClockWise[i],
+        sortedByClockWise[i + 1]
+      );
+      totalArea += triangle.getArea();
+    }
+
+    return totalArea;
+  }
 }
 
 //팩토리 객체
@@ -66,3 +81,17 @@ class ShapeFactory {
 }
 
 export { Point, Shape, Line, Triangle, Polygon, ShapeFactory };
+
+function sortPointsCounterClockwise(points) {
+  // 1. 중심점(무게중심) 구하기
+  const centerX = points.reduce((sum, p) => sum + p.x, 0) / points.length;
+  const centerY = points.reduce((sum, p) => sum + p.y, 0) / points.length;
+  const center = { x: centerX, y: centerY };
+
+  // 2. 각 점의 극각(atan2)을 구하고 정렬
+  return points.slice().sort((a, b) => {
+    const angleA = Math.atan2(a.y - center.y, a.x - center.x);
+    const angleB = Math.atan2(b.y - center.y, b.x - center.x);
+    return angleA - angleB; // 작은 각도부터 큰 각도 순으로 정렬 (반시계 방향)
+  });
+}
