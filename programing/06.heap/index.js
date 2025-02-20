@@ -1,14 +1,14 @@
 class Heap {
+  #types = {}; // private 필드
+
   constructor() {
     this.heap = [];
-    this._types = {}; //private
     this.heapSize = 0;
-    this.baseAddress = ''; //16진수 형태의 string
+    this.baseAddress = ''; // 16진수 형태의 string
   }
 
   // 메모리 배열 초기화
   init(heapSize) {
-    // 메모리 초기화 코드
     this.heapSize = heapSize;
     this.heap = Array.from({ length: heapSize }, () => this.createEmptyBlock());
 
@@ -23,43 +23,42 @@ class Heap {
   setSize(type, length) {
     const validSizes = [1, 2, 3, 8, 16, 32];
 
-    if (this._types[type]) {
-      throw new Error(`This ${type} is already defined`);
+    if (this.#types[type]) {
+      throw new Error(`Type "${type}" is already defined`);
     }
 
     if (!validSizes.includes(length)) {
-      throw new Error('Invalid length. Valid sizes are 1, 2, 3, 8, 16, 32.');
+      throw new Error('Invalid length. Valid sizes are 1, 2, 4, 8, 16, 32.');
     }
 
-    this._types[type] = length;
+    this.#types[type] = length;
+  }
+
+  // 등록된 타입 조회
+  get types() {
+    return { ...this.#types }; // 🔍 읽기 전용 객체 반환 (외부에서 수정 방지)
   }
 
   // 메모리 할당
   malloc(type, count) {
-    //타입 유효성 검사
-    if (!this._types[type]) {
+    if (!this.#types[type]) {
       throw new Error('Invalid type');
     }
 
-    const typeLength = this._types[type]; // 타입 길이를 가져옴
+    const typeLength = this.#types[type];
     let totalSize = typeLength * count;
 
-    // 작은 타입은 8바이트로 패딩을 추가
     if (typeLength < 8) {
-      totalSize = Math.ceil(totalSize / 8) * 8; // 패딩을 추가하여 8바이트 단위로 맞춤
+      totalSize = Math.ceil(totalSize / 8) * 8;
     }
 
-    // 할당을 시작할 위치를 찾기
     const startIndex = this.findAvailableSpace(totalSize);
-
-    // 할당할 충분한 공간이 없을 때
     if (startIndex === -1) {
       throw new Error('Not enough memory to allocate');
     }
 
-    //할당
     for (let i = startIndex; i < startIndex + totalSize; i++) {
-      this.heap[i] = { type, totalSize: totalSize, isAllocated: true };
+      this.heap[i] = { type, totalSize, isAllocated: true };
     }
 
     return this.decimalToHex(startIndex);
@@ -67,17 +66,13 @@ class Heap {
 
   // 메모리 해제
   free(pointer) {
-    const targetAddress = this.hexToDecimal(pointer); // 상대 주소 10진법 = 배열의 인덱스
+    const targetAddress = this.hexToDecimal(pointer);
 
-    // 주소 범위가 유효한지 검사
     if (targetAddress < 0 || targetAddress >= this.heapSize) {
       throw new Error('Invalid memory address');
     }
 
-    //시작 인덱스를 찾고 그 값의 사이즈를 찾아 그 사이즈를 더한 인덱스까지 초기화
     const targetBlock = this.heap[targetAddress];
-
-    // free할 주소가 이미 free인지 검증
     if (!targetBlock.isAllocated) {
       throw new Error('Memory at this address is already free');
     }
@@ -85,11 +80,10 @@ class Heap {
     const targetSize = targetBlock.totalSize;
     const removedData = { ...targetBlock };
 
-    // 초기화 과정
     for (let i = targetAddress; i < targetAddress + targetSize; i++) {
       this.heap[i] = this.createEmptyBlock();
     }
-    // 제거한 데이터 반환
+
     return removedData;
   }
 
@@ -98,7 +92,6 @@ class Heap {
       const isAbleToAllocate = this.heap
         .slice(i, i + size)
         .every((block) => !block.isAllocated);
-
       if (isAbleToAllocate) {
         return i;
       }
