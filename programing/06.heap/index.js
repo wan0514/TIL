@@ -21,7 +21,7 @@ class Heap {
 
   // 타입과 크기 설정
   setSize(type, length) {
-    const validSizes = [1, 2, 3, 8, 16, 32];
+    const validSizes = [1, 2, 4, 8, 16, 32];
 
     if (this.#types[type]) {
       throw new Error(`Type "${type}" is already defined`);
