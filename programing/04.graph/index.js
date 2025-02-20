@@ -14,13 +14,34 @@ const prompt = () => {
       if (input === 'end') {
         rl.close();
       } else {
-        const result = validateAndParseCoordinates(input);
-        if (result) {
-          const points = result.map(({ x, y }) => new Point(x, y));
-          const geometry = GeometryFactory.createGeometry(points);
-
-          console.log(geometry.calculate());
+        //검증 단계
+        const validFormat = isValidFormat(input);
+        if (!validFormat) {
+          console.log('잘못된 형식입니다.');
+          return prompt();
         }
+
+        //추출
+        const coordinates = extractCoordinates(input);
+
+        //추출한 x,y 값 검증
+        const validRange = isValidRange(coordinates);
+        if (!validRange) {
+          console.log('숫자가 0~24 범위를 벗어났습니다.');
+          return prompt();
+        }
+
+        const validCount = hasEnoughPoints(coordinates);
+        if (!validCount) {
+          console.log('좌표의 개수는 최소 2개 입력해야합니다.');
+          return prompt();
+        }
+
+        // 최종적으로 검증된 좌표들 처리
+        const points = coordinates.map(({ x, y }) => new Point(x, y));
+        const geometry = GeometryFactory.createGeometry(points);
+
+        console.log(geometry.calculate());
 
         prompt(); // 다시 입력 받기
       }
@@ -35,19 +56,6 @@ rl.on('close', () => {
 // 프로그램 실행
 prompt();
 
-// 변환함수 : 입력값 '(x,y)-(x,y)' -> [{x,y}, {x,y}]
-function validateAndParseCoordinates(input) {
-  //유효한 입력값인지 검증
-  const validationAndProcess = validateAndProcess(input);
-
-  if (!validationAndProcess.valid) {
-    console.log(validationAndProcess.reason);
-    return;
-  }
-
-  return validationAndProcess.coordinates;
-}
-
 // 모든 (x,y) 찾기 => {x,y}
 function extractCoordinates(input) {
   const regex = /\((\d{1,2}),(\d{1,2})\)/g;
@@ -60,33 +68,21 @@ function extractCoordinates(input) {
   }));
 }
 
-// 좌표가 0~24 사이인지 검증하는 함수
+// 좌표가 0~24 사이인지 검증
 function isValidRange(coordinates) {
   return coordinates.every(
     ({ x, y }) => x >= 0 && x <= 24 && y >= 0 && y <= 24
   );
 }
-
-function validateAndProcess(input) {
-  // 입력 포맷 검증 정규식
+// 포맷이 맞는지 검증
+function isValidFormat(input) {
   const regex =
     /^\s*\(\s*\d{1,2}\s*,\s*\d{1,2}\s*\)(\s*-\s*\(\s*\d{1,2}\s*,\s*\d{1,2}\s*\))*\s*$/;
 
-  if (!regex.test(input)) return { valid: false, reason: '잘못된 형식입니다.' };
+  return regex.test(input);
+}
 
-  const coordinates = extractCoordinates(input);
-
-  // 숫자가 0~24 사이인지 검증
-  if (!isValidRange(coordinates)) {
-    return { valid: false, reason: '숫자가 0~24 범위를 벗어났습니다.' };
-  }
-  // 좌표의 개수
-  const count = coordinates.length;
-
-  //좌표의 개수 2개이상인지 검증
-  if (count === 1) {
-    return { valid: false, reason: '좌표의 개수는 최소 2개 입력해야합니다.' };
-  }
-
-  return { valid: true, count, coordinates };
+// 좌표가 2개 이상인지 검증
+function hasEnoughPoints(coordinates) {
+  return coordinates.length >= 2;
 }
