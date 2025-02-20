@@ -3,7 +3,7 @@ class Heap {
     this.heap = [];
     this._types = {}; //private
     this.heapSize = 0;
-    this.baseAddress = '';
+    this.baseAddress = ''; //16진수 형태의 string
   }
 
   // 메모리 배열 초기화
@@ -11,6 +11,8 @@ class Heap {
     // 메모리 초기화 코드
     this.heapSize = heapSize;
     this.heap = Array.from({ length: heapSize }, () => ({
+      type: null,
+      totalSize: 0,
       isAllocated: false,
     }));
 
@@ -23,7 +25,6 @@ class Heap {
 
   // 타입과 크기 설정
   setSize(type, length) {
-    // TODO: 타입과 크기 설정 코드
     const validSizes = [1, 2, 3, 8, 16, 32];
 
     if (this._types[type]) {
@@ -39,8 +40,7 @@ class Heap {
 
   // 메모리 할당
   malloc(type, count) {
-    // TODO: 메모리 할당 코드
-
+    //타입 유효성 검사
     if (!this._types[type]) {
       throw new Error('Invalid type');
     }
@@ -54,10 +54,9 @@ class Heap {
     }
 
     // 할당을 시작할 위치를 찾기
-    const baseIndex = parseInt(this.baseAddress, 16); // baseAddress를 10진수로 변환
     let startIndex = -1; // defualt: -1 존재 안한다는 뜻
 
-    for (let i = baseIndex; i <= this.heapSize - totalSize; i++) {
+    for (let i = 0; i <= this.heapSize - totalSize; i++) {
       const isAbleToAllocate = this.heap
         .slice(i, i + totalSize)
         .every((block) => block.isAllocated === false);
@@ -68,40 +67,56 @@ class Heap {
       }
     }
 
+    // 할당할 충분한 공간이 없을 때
     if (startIndex === -1) {
       throw new Error('Not enough memory to allocate');
     }
 
     //할당
     for (let i = startIndex; i < startIndex + totalSize; i++) {
-      this.heap[i] = { type, size: totalSize, isAllocated: true };
+      this.heap[i] = { type, totalSize: totalSize, isAllocated: true };
     }
 
-    const relativeAddress = startIndex - baseIndex;
-
-    return this.decimalToHex(relativeAddress);
+    return this.decimalToHex(startIndex);
   }
 
   // 메모리 해제
   free(pointer) {
-    // TODO: 메모리 해제 코드
-  }
+    const targetAddress = this.hexToDecimal(pointer); // 상대 주소 10진법 = 배열의 인덱스
 
-  // types의 getter
-  get types() {
-    // TODO: types 반환 코드
-  }
+    // 주소 범위가 유효한지 검사
+    if (targetAddress < 0 || targetAddress >= this.heapSize) {
+      throw new Error('Invalid memory address');
+    }
 
-  // types의 setter
-  set types(newType) {
-    // TODO: types 설정 코드
+    //시작 인덱스를 찾고 그 값의 사이즈를 찾아 그 사이즈를 더한 인덱스까지 초기화
+    const targetBlock = this.heap[targetAddress];
+
+    // free할 주소가 이미 free인지 검증
+    if (!targetBlock.isAllocated) {
+      throw new Error('Memory at this address is already free');
+    }
+
+    const targetSize = targetBlock.totalSize;
+    const removedData = { ...targetBlock };
+
+    // 초기화 과정
+    for (let i = targetAddress; i < targetAddress + targetSize; i++) {
+      this.heap[i] = {
+        type: null,
+        totalSize: 0,
+        isAllocated: false,
+      };
+    }
+    // 제거한 데이터 반환
+    return removedData;
   }
 
   decimalToHex(decimal) {
     return `0x${decimal.toString(16).toUpperCase()}`;
   }
 
-  getBaseAddressToHex() {
-    return `0x${this.baseAddress.toString(16).toUpperCase()}`;
+  hexToDecimal(hex) {
+    return parseInt(hex, 16);
   }
 }
