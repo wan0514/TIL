@@ -10,11 +10,7 @@ class Heap {
   init(heapSize) {
     // 메모리 초기화 코드
     this.heapSize = heapSize;
-    this.heap = Array.from({ length: heapSize }, () => ({
-      type: null,
-      totalSize: 0,
-      isAllocated: false,
-    }));
+    this.heap = Array.from({ length: heapSize }, () => this.createEmptyBlock());
 
     // baseAddress가 heapSize를 넘어가지 않도록 제한
     const randomBase = Math.floor(Math.random() * (this.heapSize / 2));
@@ -54,18 +50,7 @@ class Heap {
     }
 
     // 할당을 시작할 위치를 찾기
-    let startIndex = -1; // defualt: -1 존재 안한다는 뜻
-
-    for (let i = 0; i <= this.heapSize - totalSize; i++) {
-      const isAbleToAllocate = this.heap
-        .slice(i, i + totalSize)
-        .every((block) => block.isAllocated === false);
-
-      if (isAbleToAllocate) {
-        startIndex = i;
-        break; // 공간을 찾았으면 반복문을 빠져나오기
-      }
-    }
+    const startIndex = this.findAvailableSpace(totalSize);
 
     // 할당할 충분한 공간이 없을 때
     if (startIndex === -1) {
@@ -102,14 +87,27 @@ class Heap {
 
     // 초기화 과정
     for (let i = targetAddress; i < targetAddress + targetSize; i++) {
-      this.heap[i] = {
-        type: null,
-        totalSize: 0,
-        isAllocated: false,
-      };
+      this.heap[i] = this.createEmptyBlock();
     }
     // 제거한 데이터 반환
     return removedData;
+  }
+
+  findAvailableSpace(size) {
+    for (let i = 0; i <= this.heapSize - size; i++) {
+      const isAbleToAllocate = this.heap
+        .slice(i, i + size)
+        .every((block) => !block.isAllocated);
+
+      if (isAbleToAllocate) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  createEmptyBlock() {
+    return { type: null, totalSize: 0, isAllocated: false };
   }
 
   decimalToHex(decimal) {
