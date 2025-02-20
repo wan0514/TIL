@@ -24,6 +24,17 @@ class Heap {
   // 타입과 크기 설정
   setSize(type, length) {
     // TODO: 타입과 크기 설정 코드
+    const validSizes = [1, 2, 3, 8, 16, 32];
+
+    if (this._types[type]) {
+      throw new Error(`This ${type} is already defined`);
+    }
+
+    if (!validSizes.includes(length)) {
+      throw new Error('Invalid length. Valid sizes are 1, 2, 3, 8, 16, 32.');
+    }
+
+    this._types[type] = length;
   }
 
   // 메모리 할당
@@ -49,4 +60,3 @@ class Heap {
 
 const myHeap = new Heap();
 myHeap.init(1024);
-console.log(myHeap.baseAddress);
