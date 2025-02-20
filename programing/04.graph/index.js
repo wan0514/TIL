@@ -6,47 +6,51 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
+const askQuestion = (query) =>
+  new Promise((resolve) => rl.question(query, resolve));
+
 //입력 모듈
-const prompt = () => {
-  rl.question(
-    '두 개 이상의 좌표값을 (x,y)-(x,y) 형태로 입력하세요> ',
-    (input) => {
-      if (input === 'end') {
-        rl.close();
-      } else {
-        //검증 단계
-        const validFormat = isValidFormat(input);
-        if (!validFormat) {
-          console.log('잘못된 형식입니다.');
-          return prompt();
-        }
+const prompt = async () => {
+  while (true) {
+    // 입력값 동기적으로 받아오기ㄴ
+    const input = await askQuestion(
+      '두 개 이상의 좌표값을 (x,y)-(x,y) 형태로 입력하세요> '
+    );
 
-        //추출
-        const coordinates = extractCoordinates(input);
-
-        //추출한 x,y 값 검증
-        const validRange = isValidRange(coordinates);
-        if (!validRange) {
-          console.log('숫자가 0~24 범위를 벗어났습니다.');
-          return prompt();
-        }
-
-        const validCount = hasEnoughPoints(coordinates);
-        if (!validCount) {
-          console.log('좌표의 개수는 최소 2개 입력해야합니다.');
-          return prompt();
-        }
-
-        // 최종적으로 검증된 좌표들 처리
-        const points = coordinates.map(({ x, y }) => new Point(x, y));
-        const geometry = GeometryFactory.createGeometry(points);
-
-        console.log(geometry.calculate());
-
-        prompt(); // 다시 입력 받기
-      }
+    // end 입력시 프로그램 종료
+    if (input.trim().toLowerCase() === 'end') {
+      rl.close();
+      break;
     }
-  );
+
+    //유효성 검사
+    const validFormat = isValidFormat(input);
+    if (!validFormat) {
+      console.log('잘못된 형식입니다.');
+      continue;
+    }
+    //추출
+    const coordinates = extractCoordinates(input);
+
+    //추출한 x,y 값 검증
+    const validRange = isValidRange(coordinates);
+    if (!validRange) {
+      console.log('숫자가 0~24 범위를 벗어났습니다.');
+      continue;
+    }
+
+    const validCount = hasEnoughPoints(coordinates);
+    if (!validCount) {
+      console.log('좌표의 개수는 최소 2개 입력해야합니다.');
+      continue;
+    }
+
+    //통과시 메인 로직
+    const points = coordinates.map(({ x, y }) => new Point(x, y));
+    const geometry = GeometryFactory.createGeometry(points);
+
+    console.log(geometry.calculate());
+  }
 };
 
 rl.on('close', () => {
