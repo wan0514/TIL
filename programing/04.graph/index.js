@@ -6,6 +6,10 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
+rl.on('close', () => {
+  console.log('프로그램 종료');
+});
+
 const askQuestion = (query) =>
   new Promise((resolve) => rl.question(query, resolve));
 
@@ -24,26 +28,10 @@ const prompt = async () => {
     }
 
     //유효성 검사
-    const validFormat = isValidFormat(input);
-    if (!validFormat) {
-      console.log('잘못된 형식입니다.');
-      continue;
-    }
-    //추출
-    const coordinates = extractCoordinates(input);
+    const coordinates = validateAndExtract(input);
 
-    //추출한 x,y 값 검증
-    const validRange = isValidRange(coordinates);
-    if (!validRange) {
-      console.log('숫자가 0~24 범위를 벗어났습니다.');
-      continue;
-    }
-
-    const validCount = hasEnoughPoints(coordinates);
-    if (!validCount) {
-      console.log('좌표의 개수는 최소 2개 입력해야합니다.');
-      continue;
-    }
+    //유효성 검사 실패하면 null반환, 성공시 좌표값 배열 반환
+    if (!coordinates) continue;
 
     //통과시 메인 로직
     const points = coordinates.map(({ x, y }) => new Point(x, y));
@@ -53,12 +41,34 @@ const prompt = async () => {
   }
 };
 
-rl.on('close', () => {
-  console.log('프로그램 종료');
-});
-
 // 프로그램 실행
 prompt();
+
+//유효성검사 + 성공시 입력값 추출
+function validateAndExtract(input) {
+  const validFormat = isValidFormat(input);
+  if (!validFormat) {
+    console.log('잘못된 형식입니다.');
+    return null;
+  }
+  //추출
+  const coordinates = extractCoordinates(input);
+
+  //추출한 x,y 값 검증
+  const validRange = isValidRange(coordinates);
+  if (!validRange) {
+    console.log('숫자가 0~24 범위를 벗어났습니다.');
+    return null;
+  }
+
+  const validCount = hasEnoughPoints(coordinates);
+  if (!validCount) {
+    console.log('좌표의 개수는 최소 2개 입력해야합니다.');
+    return null;
+  }
+
+  return coordinates;
+}
 
 // 모든 (x,y) 찾기 => {x,y}
 function extractCoordinates(input) {
