@@ -97,17 +97,3 @@ class GeometryFactory {
 }
 
 export { Point, Geometry, Line, Triangle, Polygon, GeometryFactory };
-
-function sortPointsCounterClockwise(points) {
-  // 1. 중심점(무게중심) 구하기
-  const centerX = points.reduce((sum, p) => sum + p.x, 0) / points.length;
-  const centerY = points.reduce((sum, p) => sum + p.y, 0) / points.length;
-  const center = { x: centerX, y: centerY };
-
-  // 2. 각 점의 극각(atan2)을 구하고 정렬
-  return points.slice().sort((a, b) => {
-    const angleA = Math.atan2(a.y - center.y, a.x - center.x);
-    const angleB = Math.atan2(b.y - center.y, b.x - center.x);
-    return angleA - angleB; // 작은 각도부터 큰 각도 순으로 정렬 (반시계 방향)
-  });
-}
