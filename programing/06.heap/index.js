@@ -45,12 +45,14 @@ class Heap {
       throw new Error('Invalid type');
     }
 
-    const typeLength = this.#types[type];
-    let totalSize = typeLength * count;
+    const typeLength = this.#types[type]; // typeLength : 타입의 메모리 크기
 
+    // typeLength가 8보다 작으면 8로 설정
     if (typeLength < 8) {
-      totalSize = Math.ceil(totalSize / 8) * 8;
+      typeLength = Math.ceil(typeLength / 8) * 8;
     }
+
+    const totalSize = typeLength * count; // 여기서 이제 최종 사이즈가 계산됨.
 
     const startIndex = this.findAvailableSpace(totalSize);
     if (startIndex === -1) {
