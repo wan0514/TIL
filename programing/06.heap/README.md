@@ -86,3 +86,18 @@ malloc에서 Best-fit / First-fit / Buddy Allocation 같은 전략이 없음
 ### 실제 힙 관리자는 최적의 메모리 블록을 찾는 알고리즘(Best-fit, First-fit, Buddy System 등)을 사용.
 
 너의 findAvailableSpace는 단순하게 첫 번째로 맞는 빈 공간을 찾는 방식이라 메모리 활용 효율이 낮을 수 있다.
+
+## ✅ 개선할 점
+
+- 단편화 문제 해결을 위해 병합(Coalescing) 기능 추가
+
+- free 실행 후, 인접한 빈 블록을 병합하는 로직 추가.
+  할당 전략 추가 (Best-fit, First-fit, Worst-fit)
+
+- 현재 findAvailableSpace는 First-fit 방식인데, Best-fit 같은 전략을 추가하면 메모리 낭비를 줄일 수 있음.
+  할당된 블록의 메타데이터 개선
+
+- 현재는 블록마다 totalSize를 저장하는데, 헤더 개념을 추가해서 시작 블록에만 size와 prev/next 정보를 저장하면 더 실제 힙과 비슷해짐.
+  더 효율적인 메모리 검색을 위해 데이터 구조 개선
+
+- 연결 리스트(Linked List)나 **프리 리스트(Free List, 빈 블록을 따로 관리하는 구조)**를 추가하면 메모리 탐색 속도가 향상될 수 있음.
