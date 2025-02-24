@@ -47,16 +47,45 @@ function isDeficient(number, factorArray, sum) {
 // 매개변수 : factors
 
 function sum(factors) {
+  //set으로 들어올 경우 배열로 만든 후 reduce
+  // [...factors] : 스프레드 연산자를 사용할 경우 factors가 배열orset 형태 둘 다 호환 가능
   return [...factors].reduce((acc, cur) => acc + cur, 0);
 }
+
+// ======= 두번째 class 변경 ========
+// 1. equalSet : 두 Set이 같은 요소를 가지는지 확인
+// - 매개변수: aset(Set), bset(Set)
+// - 반환값: boolean (true: 두 Set이 동일, false: 다름)
+const equalSet = (aset, bset) => {
+  if (aset.size !== bset.size) return false;
+  for (const a of aset) if (!bset.has(a)) return false;
+  return true;
+};
+
+// 2. isPrime : 주어진 숫자가 소수인지 확인
+// - 매개변수: number (판별할 숫자), factors,
+// - 조건:
+//   - 숫자가 1보다 커야 함
+//   - 약수 집합(factors)이 {1, number}와 동일해야 함b
+// - 반환값: boolean (true: 소수, false: 소수 아님)
+const isPrime = (number, factors, equalSet) => {
+  const primeSet = new Set([1, number]);
+  return number > 1 && equalSet(factors, primeSet);
+};
 
 // ****함수형 코드 테스트****
 
 const testNumber1 = 10;
 const testNumber2 = 6;
+const testNumber3 = 7;
 
 const factors1 = factors(testNumber1, isFactor);
 const factors2 = factors(testNumber2, isFactor);
+const factors3 = factors(testNumber3, isFactor);
 
 console.log(isPerfect(testNumber1, factors1, sum)); // false
 console.log(isPerfect(testNumber2, factors2, sum)); // true
+
+// 두번째 class 테스트
+console.log(isPrime(testNumber1, factors1, equalSet)); // false (10은 소수가 아님)
+console.log(isPrime(testNumber3, factors3, equalSet)); // true (7은 소수)
