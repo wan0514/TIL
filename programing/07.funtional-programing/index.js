@@ -17,9 +17,11 @@ function isFactor(number, potentialFactor) {
 // // 매개변수 : number, isFactor(함수)
 
 const factors = (number, isFactor) =>
-  Array.from({ length: Math.floor(Math.sqrt(number)) }, (_, i) => i + 1)
-    .filter((pod) => isFactor(number, pod))
-    .flatMap((pod) => [pod, number / pod]);
+  new Set(
+    Array.from({ length: Math.floor(Math.sqrt(number)) }, (_, i) => i + 1)
+      .filter((pod) => isFactor(number, pod))
+      .flatMap((pod) => [pod, number / pod])
+  );
 
 //3. isPerfect : 완전수 확인, boolean 반환
 //  매개변수 : number, factorArray, sum(함수)
@@ -45,7 +47,7 @@ function isDeficient(number, factorArray, sum) {
 // 매개변수 : factors
 
 function sum(factors) {
-  return factors.reduce((acc, cur) => acc + cur, 0);
+  return [...factors].reduce((acc, cur) => acc + cur, 0);
 }
 
 // ****함수형 코드 테스트****
