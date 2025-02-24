@@ -9,29 +9,44 @@ import input from './input.js';
 
 // QR 코드 시작 & 종료 검증 함수
 function isValidStart(input) {
-  return (
-    input[20][20] === '1' &&
-    input[20][19] === '1' &&
-    input[19][20] === '0' &&
-    input[19][19] === '0'
-  );
+  const startPattern = [
+    { row: 20, column: 20, value: '1' },
+    { row: 20, column: 19, value: '1' },
+    { row: 19, column: 20, value: '0' },
+    { row: 19, column: 19, value: '0' },
+  ];
+
+  return checkPattern(input, startPattern);
 }
 
 function isValidEnd(input) {
-  return (
-    input[19][10] === '0' &&
-    input[19][9] === '1' &&
-    input[20][10] === '1' &&
-    input[20][9] === '0'
+  const endPattern = [
+    { row: 19, column: 10, value: '0' },
+    { row: 19, column: 9, value: '1' },
+    { row: 20, column: 10, value: '1' },
+    { row: 20, column: 9, value: '0' },
+  ];
+
+  return checkPattern(input, endPattern);
+}
+
+// 공통된 패턴 체크 함수
+function checkPattern(input, patternRules) {
+  return patternRules.every(
+    ({ row, column, value }) => input[row][column] === value
   );
 }
+
 // 2차원 배열로 반환
 function getArrayFromString(input) {
   return input.map((string) => string.split(''));
 }
 
-const qrCodeArray = getArrayFromString(input);
+// 길이값 읽는 함수
+function getLength() {}
 
 //=== test ===
+const qrCodeArray = getArrayFromString(input);
+
 console.log(isValidEnd(qrCodeArray));
 console.log(isValidStart(qrCodeArray));
