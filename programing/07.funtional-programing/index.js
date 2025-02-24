@@ -73,22 +73,31 @@ const isPrime = (number, factors, equalSet) => {
   return number > 1 && equalSet(factors, primeSet);
 };
 
+// 3. 정사각수 함수
+// 필요한 매개변수: number
+// 반환값 : boolean(true: 정사각수, false: 정사각수 아님)
+
+const isSquare = (number) => {
+  const squareRoot = Math.sqrt(number);
+  return Number.isInteger(squareRoot);
+};
+
 // ****함수형 코드 테스트****
 
-const testNumber1 = 10;
-const testNumber2 = 6;
-const testNumber3 = 7;
+// const testNumber1 = 10;
+// const testNumber2 = 6;
+// const testNumber3 = 7;
 
-const factors1 = factors(testNumber1, isFactor);
-const factors2 = factors(testNumber2, isFactor);
-const factors3 = factors(testNumber3, isFactor);
+// const factors1 = factors(testNumber1, isFactor);
+// const factors2 = factors(testNumber2, isFactor);
+// const factors3 = factors(testNumber3, isFactor);
 
-console.log(isPerfect(testNumber1, factors1, sum)); // false
-console.log(isPerfect(testNumber2, factors2, sum)); // true
+// console.log(isPerfect(testNumber1, factors1, sum)); // false
+// console.log(isPerfect(testNumber2, factors2, sum)); // true
 
-// 두번째 class 테스트
-console.log(isPrime(testNumber1, factors1, equalSet)); // false (10은 소수가 아님)
-console.log(isPrime(testNumber3, factors3, equalSet)); // true (7은 소수)
+// // 두번째 class 테스트
+// console.log(isPrime(testNumber1, factors1, equalSet)); // false (10은 소수가 아님)
+// console.log(isPrime(testNumber3, factors3, equalSet)); // true (7은 소수)
 
 export {
   isFactor,
@@ -99,4 +108,5 @@ export {
   sum,
   equalSet,
   isPrime,
+  isSquare,
 };
