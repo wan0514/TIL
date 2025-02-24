@@ -48,8 +48,8 @@ function isDeficient(number, factorArray, sum) {
 
 function sum(factors) {
   //set으로 들어올 경우 배열로 만든 후 reduce
-  // [...factors] : 스프레드 연산자를 사용할 경우 factors가 배열orset 형태 둘 다 호환 가능
-  return [...factors].reduce((acc, cur) => acc + cur, 0);
+  // [...factors] : 배열일 경우 원본이 그대로 참조되기 때문에 Array.from으로 변경
+  return Array.from(factors).reduce((acc, cur) => acc + cur, 0);
 }
 
 // ======= 두번째 class 변경 ========
