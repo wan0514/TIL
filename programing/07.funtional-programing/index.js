@@ -89,3 +89,14 @@ console.log(isPerfect(testNumber2, factors2, sum)); // true
 // 두번째 class 테스트
 console.log(isPrime(testNumber1, factors1, equalSet)); // false (10은 소수가 아님)
 console.log(isPrime(testNumber3, factors3, equalSet)); // true (7은 소수)
+
+export {
+  isFactor,
+  factors,
+  isPerfect,
+  isAbundant,
+  isDeficient,
+  sum,
+  equalSet,
+  isPrime,
+};
