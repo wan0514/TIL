@@ -12,31 +12,88 @@ import {
   readUp,
   readDown,
 } from './readModule.js';
+import dataPatterns from './patterns.js';
 
-// QR 코드 시작 & 종료 검증 함수
-function isValidStart(input) {
-  const validNumber = '1100';
-  const result = readUp(20, 20, input);
-
-  return result === validNumber;
-}
-
-function isValidEnd(input) {
-  const validNumber = '0110';
-  const result = readDown(19, 10, input);
-  return result === validNumber;
-}
-
-// 2차원 배열로 반환
+// input을 2차원 배열로 반환
 function getArrayFromString(input) {
   return input.map((string) => string.split(''));
 }
 
+//시작,끝 검증 함수
+function validatePattern(pattern, input) {
+  const { method, start, length, valid } = pattern;
+  if (!valid) return false;
+
+  const result = getReadFunction(method)(start, input, length);
+  return result === valid;
+}
+
+// 추출 함수
+function extractPattern(pattern, input) {
+  return getReadFunction(pattern.method)(pattern.start, input);
+}
+
+//매소드 호출
+function getReadFunction(method) {
+  const methods = {
+    readUp,
+    readDown,
+    readCounterclockwise,
+    readClockwise,
+  };
+
+  return methods[method];
+}
+
+// QR 코드 시작 & 종료 검증
+const isStartValid = (input) => {
+  const pattern = dataPatterns.find((p) => p.type === 'start');
+  const validation = validatePattern(pattern, input);
+  return validation;
+};
+
+const isEndValid = (input) => {
+  const pattern = dataPatterns.find((p) => p.type === 'end');
+  const validation = validatePattern(pattern, input);
+  return validation;
+};
+
 // 길이값 읽는 함수
-function getLength() {}
+function getDataLength(input) {
+  const lengthPattern = dataPatterns.find(
+    (pattern) => pattern.type === 'length'
+  );
+  const binaryLength = extractPattern(lengthPattern, input); // 2진수 문자열 반환
+  const decimalLength = parseInt(binaryLength, 2); // 2진수 → 10진수
+
+  return decimalLength;
+}
+
+// data 목록 추출
+
+const getData = (input, length) => {
+  let result = [];
+
+  for (let i = 1; i <= length; i++) {
+    const type = `#${i}`;
+    const data = extractPattern(
+      dataPatterns.find((p) => p.type === type),
+      input
+    );
+    result.push(data);
+  }
+
+  return result;
+};
 
 //=== test ===
 const qrCodeArray = getArrayFromString(input);
 
-console.log(isValidEnd(qrCodeArray));
-console.log(isValidStart(qrCodeArray));
+console.log(isStartValid(qrCodeArray)); //true
+console.log(isEndValid(qrCodeArray)); //ture
+
+const dataLength = getDataLength(qrCodeArray);
+const dataArray = getData(qrCodeArray, dataLength);
+
+console.log(dataLength); //5
+console.log(dataArray); // [ '00001010', '00101010', '00001011', '00101010', '00001100' ]
