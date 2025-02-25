@@ -1,33 +1,35 @@
 function readCounterclockwise(startIndex, input) {
   const [col, row] = startIndex;
-  return readUp(startIndex, input, 2) + readDown([col - 1, row - 2], input, 2);
+  // counterclockwise 방향으로 읽기: 위로, 아래로
+  const firstPart = readUp(startIndex, input, 2);
+  const secondPart = readDown([col - 1, row - 2], input, 2);
+  return firstPart + secondPart;
 }
 
 function readClockwise(startIndex, input) {
   const [col, row] = startIndex;
-  return readDown(startIndex, input, 2) + readUp([col + 1, row - 2], input, 2);
+  // clockwise 방향으로 읽기: 아래로, 위로
+  const firstPart = readDown(startIndex, input, 2);
+  const secondPart = readUp([col + 1, row - 2], input, 2);
+  return firstPart + secondPart;
 }
 
 function readUp(startIndex, input, length = 4) {
   const [col, row] = startIndex;
-  let result = '';
-  for (let i = col; i > col - length; i--) {
-    for (let j = row; j >= row - 1; j--) {
-      result += input[i][j];
-    }
-  }
-  return result;
+  const step = -1; // 위로 가는 방향은 -1
+
+  return Array.from({ length }, (_, i) =>
+    [input[col + i * step][row], input[col + i * step][row - 1]].join('')
+  ).join('');
 }
 
 function readDown(startIndex, input, length = 4) {
   const [col, row] = startIndex;
-  let result = '';
-  for (let i = col; i < col + length; i++) {
-    for (let j = row; j >= row - 1; j--) {
-      result += input[i][j];
-    }
-  }
-  return result;
+  const step = 1; // 아래로 가는 방향은 +1
+
+  return Array.from({ length }, (_, i) =>
+    [input[col + i * step][row], input[col + i * step][row - 1]].join('')
+  ).join('');
 }
 
 const readModule = { readCounterclockwise, readClockwise, readUp, readDown };
