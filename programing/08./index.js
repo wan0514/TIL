@@ -6,13 +6,13 @@ import { getArrayFromString, mergeErrorsToHex } from './dataUtils.js';
 
 // 시작/끝 검증
 const isStartValid = (inputData) => {
-  const pattern = dataPatterns.find((p) => p.type === 'start');
+  const pattern = dataPatterns['start'];
   const result = extractPattern(pattern, inputData);
   return result === pattern.valid;
 };
 
 const isEndValid = (inputData) => {
-  const pattern = dataPatterns.find((p) => p.type === 'end');
+  const pattern = dataPatterns['end'];
   const result = extractPattern(pattern, inputData);
   return result === pattern.valid;
 };
@@ -25,9 +25,7 @@ function extractPattern(pattern, inputData) {
 
 // 길이값 추출
 function getDataLength(inputData) {
-  const lengthPattern = dataPatterns.find(
-    (pattern) => pattern.type === 'length'
-  );
+  const lengthPattern = dataPatterns['length'];
   const binaryLength = extractPattern(lengthPattern, inputData);
   return parseInt(binaryLength, 2);
 }
@@ -36,7 +34,7 @@ function getDataLength(inputData) {
 const getData = (inputData, length) => {
   return Array.from({ length: length }, (_, i) => {
     const type = `#${i + 1}`;
-    const pattern = dataPatterns.find((p) => p.type === type);
+    const pattern = dataPatterns[type];
 
     return extractPattern(pattern, inputData);
   });
@@ -47,7 +45,7 @@ const getError = (inputData) => {
 
   return Array.from({ length: errorLength }, (_, i) => {
     const type = `error #${i + 1}`;
-    const pattern = dataPatterns.find((p) => p.type === type);
+    const pattern = dataPatterns[type];
 
     return extractPattern(pattern, inputData);
   });
