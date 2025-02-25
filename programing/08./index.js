@@ -4,15 +4,9 @@ import dataPatterns from './patterns.js';
 import { decodeDataString } from './codeMap.js';
 import { getArrayFromString, mergeErrorsToHex } from './dataUtils.js';
 
-// 시작/끝 검증
-const isStartValid = (inputData) => {
-  const pattern = dataPatterns['start'];
-  const result = extractPattern(pattern, inputData);
-  return result === pattern.valid;
-};
-
-const isEndValid = (inputData) => {
-  const pattern = dataPatterns['end'];
+// 시작/끝 검증  validName : 'start' || 'end'
+const isValid = (inputData, validName) => {
+  const pattern = dataPatterns[validName];
   const result = extractPattern(pattern, inputData);
   return result === pattern.valid;
 };
@@ -30,33 +24,26 @@ function getDataLength(inputData) {
   return parseInt(binaryLength, 2);
 }
 
-// 데이터 목록 추출
-const getData = (inputData, length) => {
-  return Array.from({ length: length }, (_, i) => {
-    const type = `#${i + 1}`;
+// 데이터 추출 (목록/에러 둘 다 유연하게 처리 가능)
+const getPatterns = (inputData, length, prefix) => {
+  return Array.from({ length }, (_, i) => {
+    const type = `${prefix}${i + 1}`;
     const pattern = dataPatterns[type];
 
     return extractPattern(pattern, inputData);
   });
 };
 
-const getError = (inputData) => {
-  const errorLength = 4;
-
-  return Array.from({ length: errorLength }, (_, i) => {
-    const type = `error #${i + 1}`;
-    const pattern = dataPatterns[type];
-
-    return extractPattern(pattern, inputData);
-  });
-};
+// 데이터 목록과 오류 데이터 추출 (람다식으로 함수 생성)
+const getData = (inputData, length) => getPatterns(inputData, length, '#');
+const getError = (inputData) => getPatterns(inputData, 4, 'error #');
 
 // main 로직
 function main(inputData) {
   const qrCodeArray = getArrayFromString(inputData);
 
   // 시작 및 끝 검증
-  if (!isStartValid(qrCodeArray) || !isEndValid(qrCodeArray)) {
+  if (!isValid(qrCodeArray, 'start') || !isValid(qrCodeArray, 'end')) {
     return [];
   }
 
