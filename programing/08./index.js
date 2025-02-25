@@ -1,10 +1,5 @@
 import input from './input.js';
-import {
-  readCounterclockwise,
-  readClockwise,
-  readUp,
-  readDown,
-} from './readModule.js';
+import readModule from './readModule.js';
 import dataPatterns from './patterns.js';
 import CODE_MAP from './codeMap.js';
 
@@ -13,22 +8,11 @@ function getArrayFromString(inputData) {
   return inputData.map((string) => string.split(''));
 }
 
-// 읽기 함수 매핑
-function getReadFunction(method) {
-  const methods = {
-    readUp,
-    readDown,
-    readCounterclockwise,
-    readClockwise,
-  };
-  return methods[method];
-}
-
 // 검증 함수: 패턴 유효성 검사
 function validatePattern(pattern, inputData) {
   const { method, start, length, valid } = pattern;
   if (!valid) return false;
-  const result = getReadFunction(method)(start, inputData, length);
+  const result = readModule[method](start, inputData, length);
   return result === valid;
 }
 
@@ -45,7 +29,7 @@ const isEndValid = (inputData) => {
 
 // 추출 함수
 function extractPattern(pattern, inputData) {
-  return getReadFunction(pattern.method)(pattern.start, inputData);
+  return readModule[pattern.method](pattern.start, inputData);
 }
 
 // 길이값 추출

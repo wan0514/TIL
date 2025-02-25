@@ -30,4 +30,6 @@ function readDown(startIndex, input, length = 4) {
   return result;
 }
 
-export { readCounterclockwise, readClockwise, readUp, readDown };
+const readModule = { readCounterclockwise, readClockwise, readUp, readDown };
+
+export default readModule;
