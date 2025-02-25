@@ -1,12 +1,8 @@
 import input from './input.js';
 import readModule from './readModule.js';
 import dataPatterns from './patterns.js';
-import CODE_MAP from './codeMap.js';
-
-// InputData을 2차원 배열로 반환
-function getArrayFromString(inputData) {
-  return inputData.map((string) => string.split(''));
-}
+import { decodeDataString } from './codeMap.js';
+import { getArrayFromString, mergeErrorsToHex } from './dataUtils.js';
 
 // 검증 함수: 패턴 유효성 검사
 function validatePattern(pattern, inputData) {
@@ -55,19 +51,6 @@ const getData = (inputData, length) => {
   return result;
 };
 
-// 데이터 디코딩 (CODE_MAP 기반)
-const decodeDataString = (inputData) => {
-  return inputData
-    .map((binaryString) => convertBinaryToDecimal(binaryString))
-    .map((decimalValue) => CODE_MAP[decimalValue])
-    .join('');
-};
-
-// 이진수를 10진수로 변환 : 데이터 디코딩에 필요
-const convertBinaryToDecimal = (binaryString) => {
-  return parseInt(binaryString, 2);
-};
-
 // 에러 추출 함수
 const getError = (inputData) => {
   const errorLength = 4;
@@ -82,16 +65,6 @@ const getError = (inputData) => {
     errorArray.push(data);
   }
   return mergeErrorsToHex(errorArray);
-};
-
-// 여러 값을 16진수로 변환 후 합치기
-const mergeErrorsToHex = (errors) => {
-  return `0x${errors.map(binaryToHex).join('')}`;
-};
-
-// 16진수 변환 함수
-const binaryToHex = (binaryString) => {
-  return parseInt(binaryString, 2).toString(16).padStart(2, '0');
 };
 
 // main 로직

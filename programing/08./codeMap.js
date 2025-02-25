@@ -46,4 +46,12 @@ const CODE_MAP = {
   44: ':',
 };
 
-export default CODE_MAP;
+// 데이터 디코딩 (CODE_MAP 기반)
+const decodeDataString = (inputData) => {
+  return inputData
+    .map((binaryString) => parseInt(binaryString, 2)) // 2진수 -> 10진수 변환
+    .map((decimalValue) => CODE_MAP[decimalValue])
+    .join('');
+};
+
+export { decodeDataString };
