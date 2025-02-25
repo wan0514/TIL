@@ -34,32 +34,23 @@ function getDataLength(inputData) {
 
 // 데이터 목록 추출
 const getData = (inputData, length) => {
-  let result = [];
-  for (let i = 1; i <= length; i++) {
-    const type = `#${i}`;
-    const data = extractPattern(
-      dataPatterns.find((p) => p.type === type),
-      inputData
-    );
-    result.push(data);
-  }
-  return result;
+  return Array.from({ length: length }, (_, i) => {
+    const type = `#${i + 1}`;
+    const pattern = dataPatterns.find((p) => p.type === type);
+
+    return extractPattern(pattern, inputData);
+  });
 };
 
-// 에러 추출 함수
 const getError = (inputData) => {
   const errorLength = 4;
 
-  let errorArray = [];
-  for (let i = 1; i <= errorLength; i++) {
-    const type = `error #${i}`;
-    const data = extractPattern(
-      dataPatterns.find((p) => p.type === type),
-      inputData
-    );
-    errorArray.push(data);
-  }
-  return mergeErrorsToHex(errorArray);
+  return Array.from({ length: errorLength }, (_, i) => {
+    const type = `error #${i + 1}`;
+    const pattern = dataPatterns.find((p) => p.type === type);
+
+    return extractPattern(pattern, inputData);
+  });
 };
 
 // main 로직
@@ -76,8 +67,9 @@ function main(inputData) {
   const dataArray = getData(qrCodeArray, dataLength);
   const decodedDataString = decodeDataString(dataArray);
   const errorData = getError(qrCodeArray);
+  const haxError = mergeErrorsToHex(errorData);
 
-  return [decodedDataString, errorData];
+  return [decodedDataString, haxError];
 }
 
 //출력 함수
