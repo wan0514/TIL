@@ -46,9 +46,9 @@ const dataPatterns = [
   { type: '#20', method: 'readDown', start: [15, 10] },
 
   { type: 'error #1', method: 'readUp', start: [12, 8] },
-  { type: 'error #2', method: 'readDown', start: [15, 5] },
+  { type: 'error #2', method: 'readDown', start: [9, 5] },
   { type: 'error #3', method: 'readUp', start: [12, 3] },
-  { type: 'error #4', method: 'readDown', start: [15, 1] },
+  { type: 'error #4', method: 'readDown', start: [9, 1] },
 ];
 
 export default dataPatterns;
