@@ -9,7 +9,7 @@ const mergeErrorsToHex = (errors) => {
 };
 
 const binaryToHex = (binaryString) => {
-  return parseInt(binaryString, 2).toString(16).padStart(2, '0');
+  return parseInt(binaryString, 2).toString(16);
 };
 
 export { getArrayFromString, mergeErrorsToHex };
