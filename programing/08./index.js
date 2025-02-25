@@ -4,28 +4,23 @@ import dataPatterns from './patterns.js';
 import { decodeDataString } from './codeMap.js';
 import { getArrayFromString, mergeErrorsToHex } from './dataUtils.js';
 
-// 검증 함수: 패턴 유효성 검사
-function validatePattern(pattern, inputData) {
-  const { method, start, length, valid } = pattern;
-  if (!valid) return false;
-  const result = readModule[method](start, inputData, length);
-  return result === valid;
-}
-
 // 시작/끝 검증
 const isStartValid = (inputData) => {
   const pattern = dataPatterns.find((p) => p.type === 'start');
-  return validatePattern(pattern, inputData);
+  const result = extractPattern(pattern, inputData);
+  return result === pattern.valid;
 };
 
 const isEndValid = (inputData) => {
   const pattern = dataPatterns.find((p) => p.type === 'end');
-  return validatePattern(pattern, inputData);
+  const result = extractPattern(pattern, inputData);
+  return result === pattern.valid;
 };
 
 // 추출 함수
 function extractPattern(pattern, inputData) {
-  return readModule[pattern.method](pattern.start, inputData);
+  // ❌실수 : 시작과 끝 추출에서도 사용하려고 변경하였으나 extractPatterns에 Length를 넣지 않아 8비트가 추출됨
+  return readModule[pattern.method](pattern.start, inputData, pattern.length);
 }
 
 // 길이값 추출
