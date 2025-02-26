@@ -22,18 +22,13 @@ const factors = (number, isFactor) =>
       .flatMap((pod) => [pod, number / pod])
   );
 
-// 🥊 Refactor : 3,4,5 중복 록로직 합치기
+// 🥊 Refactor : sum함수의 결과값을 매개변수로 넘겨주는 식으로 중복로직과 불필요한 함수 매개변수 전달을 제거
 
-const sumOfFactors = (number, factorArray, sum) => sum(factorArray) - number;
+const isPerfect = (number, sumOfFactors) => sumOfFactors - number === number;
 
-const isPerfect = (number, factorArray, sum) =>
-  sumOfFactors(number, factorArray, sum) === number;
+const isAbundant = (number, sumOfFactors) => sumOfFactors - number > number;
 
-const isAbundant = (number, factorArray, sum) =>
-  sumOfFactors(number, factorArray, sum) > number;
-
-const isDeficient = (number, factorArray, sum) =>
-  sumOfFactors(number, factorArray, sum) < number;
+const isDeficient = (number, sumOfFactors) => sumOfFactors - number < number;
 
 //6. sum : 약수 배열을 받아 다 더한값을 반환
 // 매개변수 : factors
@@ -85,8 +80,11 @@ const factors1 = factors(testNumber1, isFactor);
 const factors2 = factors(testNumber2, isFactor);
 const factors3 = factors(testNumber3, isFactor);
 
-console.log(isPerfect(testNumber1, factors1, sum)); // false
-console.log(isPerfect(testNumber2, factors2, sum)); // true
+const sumOfFactor01 = sum(factors1);
+const sumOfFactor02 = sum(factors2);
+
+console.log(isPerfect(testNumber1, sumOfFactor01)); // false
+console.log(isPerfect(testNumber2, sumOfFactor02)); // true
 
 // 두번째 class 테스트
 console.log(isPrime(testNumber1, factors1, equalSet)); // false (10은 소수가 아님)
