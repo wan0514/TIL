@@ -10,52 +10,65 @@ import {
   isSquare,
 } from './index.js';
 
-// 2. 2~100 자연수를 받아 완전수,과잉수,부족수,소수,정사각수를 판별하여 목록으로 출력
+//개선할 점
+/*
+1. 클로저와 람다를 활용해서 중복을 줄이자
+중복되는 연산(약수 합 구하기 등)을 미리 계산해서 재사용하면 좋음.
+sumOfFactors(number, factorArray, sum) 같은 함수로 분리한 것처럼,
+**"한 번 계산한 값은 다시 계산하지 않도록 클로저를 활용"**할 수 있음.
+예를 들어, 각 숫자의 판별 결과를 리턴하는 함수를 클로저로 만들면 재사용하기 쉬움.
 
-// 2-1. min~ max 숫자 배열 생성
+2. 2부터 100까지 map()을 활용해서 판별 결과를 출력하자
+이제 2~100까지 숫자를 배열로 만든 후 map()을 써서 변환
+
+3. 출력은 값을 받아서 출력만 시키게
+*/
+
+// 미션:  2~100 자연수를 받아 완전수,과잉수,부족수,소수,정사각수를 판별하여 목록으로 출력
+
+// min~ max 숫자 배열 생성
 const getArrayMinToMax = (min, max) => {
   return Array.from({ length: max - min + 1 }, (_, index) => min + index);
 };
 
-// 2-2. 완전수, 풍족수, 부족수 판별
-const checkSumCategories = (number, factors, sum) => {
-  if (isDeficient(number, factors, sum)) return 'deficient';
-  if (isAbundant(number, factors, sum)) return 'abundant';
-  if (isPerfect(number, factors, sum)) return 'perfect';
-  return ''; // 빈 문자열 반환
+// 🥊 Refactor : 클로저를 활용해서 number을 받았을 때 판별결과를 반환시키기
+
+const createClassifier = (number) => {
+  const factorList = factors(number, isFactor);
+  const sumOfFactors = sum(factorList);
+
+  // 완전수, 풍족수, 부족수 판별 함수 클로저로 반환
+  return () => ({
+    // number,
+    perfect: isPerfect(number, sumOfFactors),
+    Abundant: isAbundant(number, sumOfFactors),
+    deficient: isDeficient(number, sumOfFactors),
+    Prime: isPrime(number, factorList, equalSet),
+    Square: isSquare(number),
+  });
 };
 
-// 2-3. 소수, 정사각수 판별
-const checkOtherCategories = (number, factors, equalSet) => {
-  if (isPrime(number, factors, equalSet)) return 'prime';
-  if (isSquare(number)) return 'squared';
-  return ''; // 빈 문자열 반환
+// 판별 반복
+const classifyNumbers = (numbers) => {
+  return numbers
+    .map((number) => {
+      const classify = createClassifier(number)();
+      const categories = Object.keys(classify)
+        .filter((key) => classify[key])
+        .join(',');
+
+      return `${number} : ${categories}`;
+    })
+    .join('\n');
 };
 
-//2-3. 출력 함수 : 클로저 사용
-const printResult = (number) => (categories) => {
-  if (categories.length > 0) {
-    console.log(`${number} : ${categories.join(', ')}`);
-  }
+const printValue = (value) => {
+  console.log(value);
 };
 
 // ===== test =====
 
 // 2부터 100까지 숫자 배열 만들기
-const numbers = getArrayMinToMax(2, 4);
+const numberArray = getArrayMinToMax(2, 100);
 
-// 각 숫자에 대해 약수 목록 구하기
-const factorsList = numbers.map((number) => factors(number, isFactor));
-
-// 판별 결과 목록 출력
-numbers.reduce((acc, number, index) => {
-  const factorsOfNumber = factorsList[index];
-  const category1 = checkSumCategories(number, factorsOfNumber, sum);
-  const category2 = checkOtherCategories(number, factorsOfNumber, equalSet);
-
-  const categories = [category1, category2].filter(Boolean); // 빈 문자열 제거
-
-  printResult(number)(categories);
-
-  return acc;
-}, []);
+printValue(classifyNumbers(numberArray));
