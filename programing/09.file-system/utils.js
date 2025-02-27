@@ -32,6 +32,19 @@ function getFileClusters(fatData, startCluster) {
   return fileClusters; // 모든 클러스터를 반환
 }
 
+// 남은 클러스터 개수를 계산하는 함수
+function getRemainingClusterCount(data) {
+  const usedClusters = Math.ceil(data.usedSpace / data.clusterSize); // 사용된 클러스터 수
+  const remainingClusters = data.totalClusters - usedClusters; // 남은 클러스터 수
+  return remainingClusters;
+}
+
+// 클러스터가 사용 가능한지 확인하는 함수
+function isClusterAvailable(data) {
+  const remainingClusters = getRemainingClusterCount(data); // 남은 클러스터 수 얻기
+  return remainingClusters > 0; // 남은 클러스터가 있으면 true, 없으면 false
+}
+
 //test
 // const fatData = {
 //   1: -1, // file1.txt (1번 클러스터, EOF)
@@ -45,4 +58,19 @@ function getFileClusters(fatData, startCluster) {
 
 // console.log(getFileClusters(fatData, 2));
 
-export { getFileData, getFileClusters };
+// const infoData = {
+//   totalSize: 1048576, // 1MB 가상 디스크
+//   usedSpace: 512000, // 사용된 바이트 수
+//   freeSpace: 536576, // 남은 바이트 수
+//   clusterSize: 512, // 한 클러스터당 512B
+//   totalClusters: 2048, // 총 2048개 클러스터
+//   fat: {
+//     1: -1, // file1.txt (1번 클러스터, EOF)
+//     2: -1, // file2.bin (2번 클러스터, EOF)
+//     3: -1, // report.pdf (3번 클러스터, EOF)
+//   },
+// };
+
+// console.log(isClusterAvailable(infoData));
+
+export { getFileData, getFileClusters, isClusterAvailable };
