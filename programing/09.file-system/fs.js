@@ -1,7 +1,7 @@
-import fs from 'fs';
+import fs, { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
-// import { dfs } from './utils';
+import { getFileData, getFileClusters } from './utils.js';
 
 //=== 구현할 기능 ===
 
@@ -64,32 +64,40 @@ function loadFile(fileName) {
   const data = JSON.parse(rawData);
 
   // 파일 탐색 로직
-  let current = data.root;
+  const current = data.root;
 
-  for (let i = 0; i < pathParts.length; i++) {
-    const part = pathParts[i];
-
-    if (i === pathParts.length - 1) {
-      if (current.files && current.files[part]) {
-        console.log(current.files[part].data);
-        return;
-      } else {
-        console.error('파일이 존재하지 않습니다.');
-        return;
-      }
-    }
-
-    if (current[part] && current[part].type === 'dir') {
-      current = current[part];
-    } else {
-      console.error('경로가 존재하지 않습니다.');
-      return;
-    }
+  const fileData = getFileData(current, pathParts);
+  if (!fileData) {
+    console.log('다시 경로를 입력해주세요');
+    return;
   }
+
+  // 시작 클러스터 번호
+  const startClusterNumber = fileData.startCluster;
+
+  // info 탐색해서 클러스터 번호부터 연속적으로 값 검사 -1이 나온 끝 클라스터 번호 get
+  const info = readFileSync(INFO_FILE_PATH, 'utf-8');
+  const fatData = JSON.parse(info).fat;
+
+  // 파일이 저장된 클러스터 번호 배열로 얻기
+  const clusterNumberArray = getFileClusters(fatData, startClusterNumber);
+
+  // 디스트 데이터 읽기
+  const diskData = readFileSync(DATA_FILE_PATH, 'utf-8');
+  // 클러스터 데이터 얻기
+  const clusters = JSON.parse(diskData).clusters;
+
+  //myfs.dat 에서 시작 클러스터 번호 ~ 끝번호 까지 데이터 결합
+  const targetData = clusterNumberArray.reduce((acc, cur) => {
+    return (acc += clusters[cur]);
+  }, '');
+
+  //결합한 데이터 콘솔로 출력
+  console.log(targetData);
 }
 
-// test
-// loadFile('/sub/start.txt');
+// test;
+loadFile('/sub/start.txt');
 
 // 파일 생성
 function saveFile() {
@@ -99,6 +107,7 @@ function saveFile() {
   // - 파일 저장
 }
 
+// ***추후 구현***
 // 디렉토리 조회
 function loadDirectory() {}
 
@@ -107,8 +116,8 @@ function saveDirectory() {}
 
 // === test ===
 
-console.log('dataFilePath', DATA_FILE_PATH);
-console.log('dirFilePath', DIR_FILE_PATH);
-console.log('infoFilePath', INFO_FILE_PATH);
+// console.log('dataFilePath', DATA_FILE_PATH);
+// console.log('dirFilePath', DIR_FILE_PATH);
+// console.log('infoFilePath', INFO_FILE_PATH);
 
-initFileSystem(500);
+// initFileSystem(500);
