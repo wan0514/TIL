@@ -10,6 +10,7 @@ const CURRENT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE_PATH = getFilePath('myfs.dat');
 const DIR_FILE_PATH = getFilePath('myfs.dir');
 const INFO_FILE_PATH = getFilePath('myfs.info');
+const CLUSTER_SIZE = 512;
 
 // 경로를 반환하는 함수
 function getFilePath(fileName) {
@@ -25,9 +26,19 @@ function convertToJSON(data) {
 // 파일 시스템 초기화 함수(디스크 크기 설정)
 
 function initFileSystem(size) {
+  // 전체 클러스터 수 계산
+  const diskBiteSize = size * 10000;
+  const totalClusters = Math.ceil(diskBiteSize / CLUSTER_SIZE);
+
   //기존 파일이 존재하는지 전부 확인
   if (!fs.existsSync(DATA_FILE_PATH)) {
-    fs.writeFileSync(DATA_FILE_PATH, convertToJSON({ clusters: {} }));
+    const clusters = {};
+    for (let i = 1; i <= totalClusters; i++) {
+      clusters[i] = ''; // 빈 클러스터로 초기화
+    }
+
+    // 데이터 파일 생성
+    fs.writeFileSync(DATA_FILE_PATH, convertToJSON({ clusters }));
   }
 
   if (!fs.existsSync(DIR_FILE_PATH)) {
@@ -40,15 +51,20 @@ function initFileSystem(size) {
   }
 
   if (!fs.existsSync(INFO_FILE_PATH)) {
+    const fat = {};
+    for (let i = 1; i <= totalClusters; i++) {
+      fat[i] = -1; // FAT 테이블 초기화: 모든 클러스터는 EOF(-1)로 시작
+    }
+
     fs.writeFileSync(
       INFO_FILE_PATH,
       convertToJSON({
-        totalSize: size,
+        totalSize: diskBiteSize,
         usedSpace: 0,
-        freeSpace: size,
-        clusterSize: 512,
-        totalClusters: 2048,
-        fat: {},
+        freeSpace: diskBiteSize,
+        clusterSize: CLUSTER_SIZE,
+        totalClusters,
+        fat,
       })
     );
   }
@@ -96,9 +112,6 @@ function loadFile(fileName) {
   console.log(targetData);
 }
 
-// test;
-loadFile('/sub/start.txt');
-
 // 파일 생성
 function saveFile() {
   // - 첫번쨰 클라스터 찾기
@@ -121,3 +134,5 @@ function saveDirectory() {}
 // console.log('infoFilePath', INFO_FILE_PATH);
 
 // initFileSystem(500);
+
+// loadFile('/sub/start.txt');
