@@ -52,6 +52,8 @@ function initFileSystem(size) {
       })
     );
   }
+
+  console.log(`${size}메가 파일 시스템의 초기화를 완료했습니다.`);
 }
 
 // 파일 읽기
@@ -87,7 +89,7 @@ function loadFile(fileName) {
 }
 
 // test
-loadFile('/sub/start.txt');
+// loadFile('/sub/start.txt');
 
 // 파일 생성
 function saveFile() {
