@@ -34,7 +34,7 @@ function initFileSystem(size) {
   if (!fs.existsSync(DATA_FILE_PATH)) {
     const clusters = {};
     for (let i = 1; i <= totalClusters; i++) {
-      clusters[i] = ''; // 빈 클러스터로 초기화
+      clusters[i] = null; // 빈 클러스터로 초기화
     }
 
     // 데이터 파일 생성
@@ -53,7 +53,7 @@ function initFileSystem(size) {
   if (!fs.existsSync(INFO_FILE_PATH)) {
     const fat = {};
     for (let i = 1; i <= totalClusters; i++) {
-      fat[i] = -1; // FAT 테이블 초기화: 모든 클러스터는 EOF(-1)로 시작
+      fat[i] = 0; // FAT 테이블 초기화: 모든 클러스터는 EOF(-1)로 시작
     }
 
     fs.writeFileSync(
