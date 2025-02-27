@@ -1,18 +1,19 @@
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
+// import { dfs } from './utils';
 
 //=== 구현할 기능 ===
 
 //파일 경로
 const CURRENT_DIR = path.dirname(fileURLToPath(import.meta.url));
-const DATA_FILE_PATH = getFilePath('myfs', 'dat');
-const DIR_FILE_PATH = getFilePath('myfs', 'dir');
-const INFO_FILE_PATH = getFilePath('myfs', 'info');
+const DATA_FILE_PATH = getFilePath('myfs.dat');
+const DIR_FILE_PATH = getFilePath('myfs.dir');
+const INFO_FILE_PATH = getFilePath('myfs.info');
 
 // 경로를 반환하는 함수
-function getFilePath(fileName, fileFormat) {
-  return path.join(CURRENT_DIR, `${fileName}.${fileFormat}`);
+function getFilePath(fileName) {
+  return path.join(CURRENT_DIR, `${fileName}`);
 }
 
 //json 파일로 변환하는 함수
@@ -33,7 +34,7 @@ function initFileSystem(size) {
     fs.writeFileSync(
       DIR_FILE_PATH,
       convertToJSON({
-        root: { type: 'dir', files: {}, subdifs: {} },
+        root: { type: 'dir', files: {} },
       })
     );
   }
@@ -54,7 +55,39 @@ function initFileSystem(size) {
 }
 
 // 파일 읽기
-function loadFile() {}
+function loadFile(fileName) {
+  const pathParts = fileName.split('/').filter(Boolean); // ['dir', 'sub', 'start.txt']
+
+  const rawData = fs.readFileSync(DIR_FILE_PATH, 'utf8');
+  const data = JSON.parse(rawData);
+
+  // 파일 탐색 로직
+  let current = data.root;
+
+  for (let i = 0; i < pathParts.length; i++) {
+    const part = pathParts[i];
+
+    if (i === pathParts.length - 1) {
+      if (current.files && current.files[part]) {
+        console.log(current.files[part].data);
+        return;
+      } else {
+        console.error('파일이 존재하지 않습니다.');
+        return;
+      }
+    }
+
+    if (current[part] && current[part].type === 'dir') {
+      current = current[part];
+    } else {
+      console.error('경로가 존재하지 않습니다.');
+      return;
+    }
+  }
+}
+
+// test
+loadFile('/sub/start.txt');
 
 // 파일 생성
 function saveFile() {
