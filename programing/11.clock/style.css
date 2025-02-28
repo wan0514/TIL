@@ -1,0 +1,45 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #333;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 10px;
+}
+
+.clock-container {
+  width: 200px;
+  height: 400px;
+  background-color: #444;
+  font-size: 2rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+  padding: 40px 20px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 30%;
+}
+
+.time-segment {
+  margin: 5px 0;
+  color: rgb(112, 112, 112);
+}
+
+.moon {
+  font-size: 2rem;
+}
+
+.second {
+  word-wrap: break-word;
+  font-size: 1rem;
+}
