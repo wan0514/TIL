@@ -40,3 +40,17 @@ const timeSegments = {
   칠: { id: 'time-35', isActive: false },
   사십일초: { id: 'time-36', isActive: false },
 };
+
+//id의 색상을 바꾸는 함수
+
+function changeColorById(id) {
+  const element = document.getElementById(id);
+
+  element.style.color = 'white';
+}
+
+// 현재 시간을  HH:MM:SS 로 반환 , date : date 객체
+function getNowDateWithFormat(date) {
+  const formatDate = date.toTimeString().split(' ')[0];
+  return formatDate;
+}
