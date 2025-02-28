@@ -1,0 +1,12 @@
+{
+  "root": {
+    "type": "dir",
+    "files": {},
+    "sub": {
+      "type": "dir",
+      "files": {
+        "start.txt": { "size": 50, "startCluster": 1 }
+      }
+    }
+  }
+}

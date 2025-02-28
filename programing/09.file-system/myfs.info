@@ -1,0 +1,14 @@
+{
+  "totalSize": 500,
+  "usedSpace": 0,
+  "freeSpace": 500,
+  "clusterSize": 512,
+  "totalClusters": 2048,
+  "fat": {
+    "1": 2,
+    "2": 4,
+    "3": -1,
+    "4": -1,
+    "5": -1
+  }
+}

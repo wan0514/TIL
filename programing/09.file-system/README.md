@@ -72,16 +72,16 @@ FAT12 작동원리와 파일 시스템의 동작 방식을 이해하고 구현�
       "file1.txt": { "size": 27, "startCluster": 1 },
       "file2.bin": { "size": 20, "startCluster": 2 }
     },
-    "subdirs": {
-      "docs": {
-        "type": "dir",
-        "files": { "report.pdf": { "size": 50, "startCluster": 3 } },
-        "subdirs": {}
-      }
-    }ㄴ
+    "docs": {
+      "type": "dir",
+      "files": { "report.pdf": { "size": 50, "startCluster": 3 } },
+      "subdirs": {}
+    }
   }
 }
 ```
+
+> 추후 다양한 파일 확장자를 다루려면 type : 'jpg' 등의 속성이 추가 되어야할 것 같지만 이 것도 리팩토링 때 시도!
 
 📌 **설명**
 
@@ -114,7 +114,10 @@ FAT12 작동원리와 파일 시스템의 동작 방식을 이해하고 구현�
 
 - **파일 시스템 크기와 사용량 관리**
 - **FAT 테이블을 포함하여 클러스터 연결 관리**
-- FAT 값이 `-1`이면 EOF(파일 끝), 다른 값이면 다음 클러스터 번호
+- FAT 테이블은 초기 생성때 미리 생성된다.(초기값은 전부 0)
+- FAT 값이 `-1`이면 EOF(파일 끝)
+- 0은 비어있는 클라스터
+- 다른 값이면 다음 클러스터 번호
 
 ## 구현할 기능
 

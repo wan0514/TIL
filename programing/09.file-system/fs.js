@@ -1,7 +1,13 @@
 import fs, { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { getFileData, getFileClusters } from './utils.js';
+import {
+  getFileData,
+  getFileClusters,
+  getNextAvailableCluster,
+  saveClusterData,
+  addFileToDirectory,
+} from './utils.js';
 
 //=== 구현할 기능 ===
 
@@ -53,7 +59,7 @@ function initFileSystem(size) {
   if (!fs.existsSync(INFO_FILE_PATH)) {
     const fat = {};
     for (let i = 1; i <= totalClusters; i++) {
-      fat[i] = 0; // FAT 테이블 초기화: 모든 클러스터는 EOF(-1)로 시작
+      fat[i] = 0; // FAT 테이블 초기화: 모든 클러스터는 0로 시작
     }
 
     fs.writeFileSync(
@@ -113,11 +119,60 @@ function loadFile(fileName) {
 }
 
 // 파일 생성
-function saveFile() {
-  // - 첫번쨰 클라스터 찾기
-  // - 디렉토리에 파일 정보 추가
-  // - 사용 공간 업데이트
-  // - 파일 저장
+function saveFile(filePath, text) {
+  const info = readFileSync(INFO_FILE_PATH, 'utf-8');
+  const infoData = JSON.parse(info);
+
+  // 텍스트를 바이트 크기로 변환 (여기서는 UTF-8로 변환)
+  const byteLength = Buffer.byteLength(text, 'utf-8');
+
+  // 클라스터가 비어있는지 확인
+  if (!isClusterAvailable(infoData)) {
+    console.error('남아있는 저장공간이 없습니다.');
+  }
+
+  // 필요한 클라스터 계산
+  const neededClusters = Math.ceil(byteLength / CLUSTER_SIZE);
+
+  // 비어있는 첫번째 클라스터 찾기
+  const firstCluster = getNextAvailableCluster(infoData.fat);
+
+  let currentCluster = firstCluster;
+  let remainData = text;
+
+  for (let i = 0; i < neededClusters; i++) {
+    // 남은 데이터 중 클러스터 크기만큼 잘라서 저장
+    const clusterData = remainData.slice(0, CLUSTER_SIZE);
+    remainData = remainData.slice(CLUSTER_SIZE);
+
+    // 다음 클러스터를 찾기 (빈 클러스터가 있을 때까지)
+    let nextCluster = getNextAvailableCluster(infoData.fat, currentCluster);
+
+    // 클러스터에 데이터 저장
+    if (i < neededClusters - 1) {
+      // 마지막 클러스터가 아니면 다음 클러스터 연결
+      infoData.fat[currentCluster] = nextCluster;
+    } else {
+      // 마지막 클러스터면 -1로 종료
+      infoData.fat[currentCluster] = -1;
+    }
+
+    // 실제로 클러스터에 데이터를 저장하는 작업
+    saveClusterData(currentCluster, clusterData);
+
+    // 다음 클러스터로 이동
+    currentCluster = nextCluster;
+  }
+
+  // 클러스터에 모든 데이터를 저장한 후, 디렉토리 정보 추가
+  addFileToDirectory(filePath, size, firstCluster);
+
+  // 사용된 공간 업데이트
+  infoData.usedSpace += byteLength;
+  infoData.freeSpace -= byteLength;
+
+  // 파일 시스템 정보 업데이트
+  fs.writeFileSync(INFO_FILE_PATH, JSON.stringify(infoData, null, 2));
 }
 
 // ***추후 구현***

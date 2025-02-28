@@ -1,3 +1,5 @@
+const DIR_FILE_PATH = getFilePath('myfs.dir');
+
 function getFileData(current, pathParts) {
   for (let i = 0; i < pathParts.length; i++) {
     const part = pathParts[i];
@@ -45,18 +47,47 @@ function isClusterAvailable(data) {
   return remainingClusters > 0; // 남은 클러스터가 있으면 true, 없으면 false
 }
 
+// 비어있는 클라스터 찾기
+function getNextAvailableCluster(fatData, currentCluster = 1) {
+  let clusterId = currentCluster; // 주어진 클러스터부터 시작
+
+  while (fatData[clusterId] !== 0) {
+    clusterId++;
+  }
+
+  return clusterId;
+}
+// 클러스터에 데이터를 저장하는 함수
+function saveClusterData(clusterId, data) {
+  const clusterFilePath = `${DIR_FILE_PATH}${clusterId}.txt`;
+  fs.writeFileSync(clusterFilePath, data);
+}
+
+// 디렉토리에 파일 정보를 추가하는 함수
+function addFileToDirectory(filePath, size, firstCluster) {
+  const dirFilePath = './dir.json'; // 가상의 디렉토리 파일 경로
+  const dirData = JSON.parse(fs.readFileSync(dirFilePath, 'utf-8'));
+
+  dirData[filePath] = {
+    firstCluster: firstCluster,
+  };
+
+  fs.writeFileSync(dirFilePath, JSON.stringify(dirData, null, 2));
+}
+
 //test
-// const fatData = {
-//   1: -1, // file1.txt (1번 클러스터, EOF)
-//   2: 4, // file2.bin (2번 클러스터, EOF)
-//   3: -1,
-//   4: -1, // report.pdf (3번 클러스터,
-//   5: 6,
-//   6: -1,
-//   7: -1,
-// };
+const fatData = {
+  1: -1, // file1.txt (1번 클러스터, EOF)
+  2: 4, // file2.bin (2번 클러스터, EOF)
+  3: 0,
+  4: -1, // report.pdf (3번 클러스터,
+  5: 6,
+  6: -1,
+  7: 0,
+};
 
 // console.log(getFileClusters(fatData, 2));
+// console.log(getNextAvailableCluster(fatData));
 
 // const infoData = {
 //   totalSize: 1048576, // 1MB 가상 디스크
@@ -73,4 +104,11 @@ function isClusterAvailable(data) {
 
 // console.log(isClusterAvailable(infoData));
 
-export { getFileData, getFileClusters, isClusterAvailable };
+export {
+  getFileData,
+  getFileClusters,
+  isClusterAvailable,
+  getNextAvailableCluster,
+  saveClusterData,
+  addFileToDirectory,
+};
