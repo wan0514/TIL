@@ -78,6 +78,7 @@ function formatDateToKr({ hour12, min, second, period }) {
     '아홉',
     '열',
   ];
+
   const minkoreanNumbers = [
     '영',
     '일',
@@ -94,41 +95,39 @@ function formatDateToKr({ hour12, min, second, period }) {
 
   const periodLetter = { AM: '오전', PM: '오후' };
 
-  let periodKr = '';
-  let hourKr = '';
-  let minKr = '';
-  let secKr = '';
+  // 숫자 10~19 처리 (십구와 같이)
+  const convertToKorean = (num, koreanNumbers) => {
+    if (num < 10) {
+      return koreanNumbers[num]; // 10 미만은 그대로 숫자로 반환
+    }
 
-  //오전 오후
-  periodKr = periodLetter[period.toUpperCase()];
+    const tens = Math.floor(num / 10); // 10의 자리를 구함
+    const ones = num % 10; // 1의 자리를 구함
 
-  //시
-  if (hour12 > 10) {
-    hourKr = hourkoreanNumbers[10] + hourkoreanNumbers[hour12 % 10];
-  } else {
-    hourKr = hourkoreanNumbers[hour12];
-  }
-  // 분
-  if (min >= 20) {
-    minKr = minkoreanNumbers[Math.floor(min / 10)] + minkoreanNumbers[10];
-    if (min % 10 !== 0) minKr += minkoreanNumbers[min % 10];
-  } else if (min > 10) {
-    minKr = minkoreanNumbers[10] + minkoreanNumbers[min % 10];
-  } else {
-    minKr = minkoreanNumbers[min];
-  }
+    // 10~19: 십일, 십이...
+    if (tens === 1) {
+      return koreanNumbers[10] + (ones === 0 ? '' : koreanNumbers[ones]);
+    }
 
-  //초
+    // 20 이상: 이십, 삼십... 또는 이십일, 이십이...
+    return (
+      koreanNumbers[tens] +
+      koreanNumbers[10] +
+      (ones === 0 ? '' : koreanNumbers[ones])
+    );
+  };
 
-  //todo: 19가 일십구로 나옴
-  if (second >= 20) {
-    secKr = minkoreanNumbers[Math.floor(second / 10)] + minkoreanNumbers[10];
-    if (second % 10 !== 0) secKr += minkoreanNumbers[second % 10];
-  } else if (second > 10) {
-    secKr = minkoreanNumbers[10] + minkoreanNumbers[second % 10];
-  } else {
-    secKr = minkoreanNumbers[second];
-  }
+  // 오전/오후 처리
+  const periodKr = periodLetter[period.toUpperCase()];
+
+  // 시 처리 (12시간제)
+  let hourKr = convertToKorean(hour12, hourkoreanNumbers); // 시간은 일반화된 방식으로 처리
+
+  // 분 처리
+  const minKr = convertToKorean(min, minkoreanNumbers);
+
+  // 초 처리
+  const secKr = convertToKorean(second, minkoreanNumbers);
 
   return { periodKr, hourKr, minKr, secKr };
 }
