@@ -1,44 +1,48 @@
 //script 파일
 
 // class map 객체
-
-const timeSegments = {
-  오: { class: 'm', isActive: false },
-  전: { class: 'am', isActive: false },
-  후: { class: 'pm', isActive: false },
-  한: { class: 'hour-1', isActive: false },
-  두: { class: 'hour-5', isActive: false },
-  세: { class: 'hour-6', isActive: false },
-  네: { class: 'hour-7', isActive: false },
-  다: { class: 'hour-8', isActive: false },
-  여: { class: 'hour-9', isActive: false },
-  일: { class: 'hour-10', isActive: false },
-  여: { class: 'hour-11', isActive: false },
-  아: { class: 'hour-12', isActive: false },
-  열: { class: 'hour-13', isActive: false },
-  섯: { class: 'hour-14', isActive: false },
-  홉: { class: 'hour-15', isActive: false },
-  일: { class: 'hour-16', isActive: false },
-  오: { class: 'time-17', isActive: false },
-  구: { class: 'time-18', isActive: false },
-  후: { class: 'time-19', isActive: false },
-  두: { class: 'time-20', isActive: false },
-  여: { class: 'time-21', isActive: false },
-  여: { class: 'time-22', isActive: false },
-  시: { class: 'time-23', isActive: false },
-  사: { class: 'time-24', isActive: false },
-  이: { class: 'time-25', isActive: false },
-  육: { class: 'time-26', isActive: false },
-  분: { class: 'time-27', isActive: false },
-  영: { class: 'time-28', isActive: false },
-  세: { class: 'time-29', isActive: false },
-  섯: { class: 'time-30', isActive: false },
-  덧: { class: 'time-31', isActive: false },
-  '🌙': { class: 'time-32', isActive: false },
-  오: { class: 'time-33', isActive: false },
-  삼: { class: 'time-34', isActive: false },
-  칠: { class: 'time-35', isActive: false },
-  사십일초: { class: 'time-36', isActive: false },
+const timeWords = {
+  period: {
+    오: { className: 'period-m' },
+    전: { className: 'period-a' },
+    후: { className: 'period-p' },
+  },
+  hour: {
+    열: { className: 'hour-ten' },
+    한: { className: 'hour-one' },
+    두: { className: 'hour-two' },
+    세: { className: 'hour-three' },
+    네: { className: 'hour-four' },
+    다: { className: 'hour-five' }, // 다섯과 여섯에 공통 사용
+    여: { className: 'hour-six, hour-eight' }, // 다섯과 여섯에 공통 사용
+    섯: { className: 'hour-five, hour-six' }, // 다섯과 여섯에서 공통되는 '섯'
+    일: { className: 'hour-seven' },
+    곱: { className: 'hour-seven' },
+    덟: { className: 'hour-eight' }, // '여덟'에서 '덟' 부분
+    아: { className: 'hour-nine' },
+    홉: { className: 'hour-nine' }, // '아홉'에서 '홉' 부분
+    시: { className: 'hour-label' }, // '시' 자체
+  },
+  minTens: {
+    이: { className: 'minute-tens-two' },
+    삼: { className: 'minute-tens-three' },
+    사: { className: 'minute-tens-four' },
+    오: { className: 'minute-tens-five' },
+    십: { className: 'minute-tens' }, // 10의 자리 표현
+  },
+  minOnes: {
+    일: { className: 'minute-ones-one' },
+    이: { className: 'minute-ones-two' },
+    삼: { className: 'minute-ones-three' },
+    사: { className: 'minute-ones-four' },
+    오: { className: 'minute-ones-five' },
+    육: { className: 'minute-ones-six' },
+    칠: { className: 'minute-ones-seven' },
+    팔: { className: 'minute-ones-eight' },
+    구: { className: 'minute-ones-nine' },
+    분: { className: 'minute-label' }, // '분' 자체
+  },
+  영: { className: 'minute-zero' }, // 분이 0일 때 '영'
 };
 
 //class의 색상을 바꾸는 함수
