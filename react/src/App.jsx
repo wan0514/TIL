@@ -1,9 +1,10 @@
+import WhyHasComponentKey from './study/component-key'
 
 function App() {
 
   return (
     <>
-  test할 것들!
+    <WhyHasComponentKey/>
     </>
   )
 }
