@@ -3,8 +3,8 @@ export default class Memory {
     this.baseAddress = 0x10000000; // 임의로 설정
     this.stackSize = 0;
     this.heapSize = 0;
-    this.stackStart = 0;
-    this.heapStart = 0;
+    this.stackStart = 0; //시작 주소 init에서 할당
+    this.heapStart = 0; // 시작 주소 init에서 할당
     this.stack = [];
     this.heap = new Map(); // 주소: { type, size, dataType, count, refCount }
     this.typeMap = new Map();
@@ -29,13 +29,13 @@ export default class Memory {
     this.stackStart = this.baseAddress;
     this.heapStart = this.baseAddress + stackSize; // 힙은 스택 다음부터 시작
 
-    // init 호출 시마다 모든 상태를 초기화하여 버그 방지
-    this.stack = [];
-    this.heap = new Map();
-    this.typeMap = new Map();
-    this.callStackFrames = [];
-    this.stackPointer = 0;
-    this.heapPointer = 0; // 힙 사용량 초기화
+    // // init 호출 시마다 모든 상태를 초기화하여 버그 방지
+    // this.stack = [];
+    // this.heap = new Map();
+    // this.typeMap = new Map();
+    // this.callStackFrames = [];
+    // this.stackPointer = 0;
+    // this.heapPointer = 0; // 힙 사용량 초기화
 
     return this.baseAddress;
   }
@@ -67,9 +67,12 @@ export default class Memory {
    * @throws {Error} 등록되지 않은 타입이거나 메모리 오버플로우 발생 시
    */
   malloc(type, count = 1) {
+    // typeMap에 인자로 받은 타입이 없으면 에러 발생
     if (!this.typeMap.has(type)) {
       throw new Error(`Type '${type}' not registered. Use setSize() first.`);
     }
+
+    // count가 최소한 1 이상이어야 함
     if (count <= 0) {
       throw new Error("Count must be a positive integer.");
     }
